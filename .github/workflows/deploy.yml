@@ -3,7 +3,7 @@ name: Deploy to Aliyun Docker
 on:
   push:
     branches:
-      - master
+      - master  # 监听 master 分支的推送
 
 jobs:
   deploy:
@@ -13,18 +13,48 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # 设置 SSH 密钥以便进行远程连接
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy to server
+    # 添加远程主机的公钥到 known_hosts
+    - name: Add SSH host key to known_hosts
       run: |
-        ssh user@101.200.160.131 'cd ~/deploy/nest-ea/ && docker-compose up -d'
-    - name: Deploy Docker containers
+        mkdir -p ~/.ssh
+        ssh-keyscan -H 101.200.160.131 >> ~/.ssh/known_hosts || true
+        chmod 644 ~/.ssh/known_hosts
+
+    # 检查 SSH 环境和文件权限
+    - name: Check SSH environment
       run: |
-        ssh user@101.200.160.131 << 'EOF'
+        echo "HOME: $HOME"
+        ls -la ~/.ssh
+        cat ~/.ssh/known_hosts
+
+    # 部署到服务器
+    - name: Deploy Docker containers to server
+      run: |
+        ssh -vT root@101.200.160.131 << 'EOF'
+          # 调试 SSH 登录过程
+          echo "Logged in as root."
+
+          # 切换到应用目录
           cd ~/deploy/nest-ea/
+
+          # 打印当前目录文件
+          ls -la
+
+          # 停止并移除现有的容器
           docker-compose down
+
+          # 检查 Docker 配置文件
+          ls -la docker-compose.yml
+
+          # 构建并启动 Docker 容器
           docker-compose up --build -d
-        EOF 
+
+          # 检查 Docker 容器状态
+          docker ps -a
+        EOF
