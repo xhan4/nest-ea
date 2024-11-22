@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   nest-ea:
     build:
-      context: .
-      dockerfile: Dockerfile  # 指定 Dockerfile 路径
+      context: .  # 构建上下文，通常是当前目录
+      dockerfile: Dockerfile  # Dockerfile 文件的位置
     ports:
-      - "3002:3002"  # 映射宿主机的 3000 端口到容器的 3002 端口
+      - "3002:3002"  # 映射宿主机的 3002 端口到容器的 3002 端口
     volumes:
       - .:/nest-ea  # 将当前目录挂载到容器的 /nest-ea 目录中，方便实时更新代码
     environment:

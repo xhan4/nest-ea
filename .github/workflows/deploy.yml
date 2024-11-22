@@ -3,28 +3,85 @@ name: Deploy to Aliyun Docker
 on:
   push:
     branches:
-      - master
+      - master  # 监听 master 分支的推送
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+    # 检出代码
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # 设置 SSH 密钥以便进行远程连接
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy to server
+    # 添加远程主机的公钥到 known_hosts
+    - name: Add SSH host key to known_hosts
       run: |
-        ssh user@101.200.160.131 'cd ~/deploy/nest-ea/ && docker-compose up -d'
-    - name: Deploy Docker containers
+        mkdir -p ~/.ssh
+        ssh-keyscan -H 101.200.160.131 >> ~/.ssh/known_hosts || true
+        chmod 644 ~/.ssh/known_hosts
+
+    # 检查 SSH 环境和文件权限
+    - name: Check SSH environment
       run: |
-        ssh user@101.200.160.131 << 'EOF'
-          cd ~/deploy/nest-ea/
+        echo "HOME: $HOME"
+        ls -la ~/.ssh
+        cat ~/.ssh/known_hosts
+
+    # 确保本地存在 docker-compose.yml
+    - name: Check if docker-compose.yml exists locally
+      run: |
+        echo "Checking if docker-compose.yml exists locally"
+        ls -la docker-compose.yml
+
+    # 上传源代码到服务器，并排除 .git 目录
+    - name: Upload source code to server (excluding .git)
+      run: |
+        echo "Uploading source code to server, excluding .git..."
+        rsync -av --exclude='.git' ./ root@101.200.160.131:/root/deploy/nest-ea/
+        echo "Source code upload complete."
+
+    # 检查远程文件夹内容
+    - name: Check if docker-compose.yml exists on server
+      run: |
+        echo "Checking if docker-compose.yml exists on server"
+        ssh root@101.200.160.131 "ls -la /root/deploy/nest-ea/"
+
+    # 部署到服务器
+    - name: Deploy Docker containers to server
+      run: |
+        # 启用错误检查，确保命令失败时会中止并报告错误
+        set -e
+
+        ssh -vT root@101.200.160.131 << 'EOF'
+          echo "Logged in as root."
+
+          # 切换到应用目录
+          cd /root/deploy/nest-ea/
+
+          # 打印当前目录文件
+          echo "Listing files in /root/deploy/nest-ea/"
+          ls -la
+
+          # 检查 docker-compose.yml 是否存在
+          echo "Checking if docker-compose.yml exists"
+          cat docker-compose.yml
+
+          # 停止并移除现有的容器
+          echo "Stopping existing containers"
           docker-compose down
-          docker-compose up --build -d
-        EOF 
+
+          # 构建并启动 Docker 容器，并输出更多调试信息
+          echo "Building and starting Docker containers"
+          docker-compose up --build
+
+          # 检查 Docker 容器状态
+          echo "Checking Docker container status"
+          docker ps -a
+        EOF
