@@ -1,5 +1,6 @@
 services:
   nest-ea:
+    image: nest-ea:${DATE_TAG}  # 使用在构建时设置的日期标签
     build:
       context: .  # 构建上下文，通常是当前目录
       dockerfile: Dockerfile  # Dockerfile 文件的位置
@@ -8,8 +9,8 @@ services:
     volumes:
       - .:/nest-ea  # 将当前目录挂载到容器的 /nest-ea 目录中，方便实时更新代码
     environment:
-      - NODE_ENV=production  # 设置环境变量，表示运行在生产环境
-    restart: always  # 容器崩溃后自动重启
+      - NODE_ENV=prod  # 设置环境变量，表示运行在生产环境
+    restart: unless-stopped  # 容器崩溃后自动重启
     networks:
       - nest-ea-network  # 定义服务使用的网络
 
