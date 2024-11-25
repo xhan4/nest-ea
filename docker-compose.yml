@@ -1,5 +1,6 @@
 services:
   nest-ea:
+    container_name: nest-ea${DATE_TAG} #设置容器名称
     image: nest-ea:${DATE_TAG}  # 使用在构建时设置的日期标签
     build:
       context: .  # 构建上下文，通常是当前目录
