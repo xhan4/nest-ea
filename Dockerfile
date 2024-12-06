@@ -34,7 +34,6 @@ COPY --from=builder /nest-ea/dist /nest-ea/dist
 COPY --from=builder /nest-ea/node_modules /nest-ea/node_modules
 COPY --from=builder /nest-ea/.env.prod /nest-ea/.env.prod
 
-RUN ls -l /nest-ea/dist
 # 暴露端口
 EXPOSE 3002
 
