@@ -42,10 +42,14 @@ jobs:
           cd /root/deploy/nest-ea/
           # 设置环境变量 DATE_TAG
           export DATE_TAG=$(date +%Y%m%d)
-          # 停止并移除现有的容器
+          # 关闭容器
+          docker-compose stop
+          # 删除容器
           docker-compose down
           # 构建并启动 Docker 容器，并输出更多调试信息
-          docker-compose up --build
+          docker-compose up -d
+          # 对空间进行自动清理
+          docker system prune -a -f
           # 检查 Docker 容器状态
           docker ps -a
         EOF
