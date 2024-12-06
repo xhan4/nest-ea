@@ -40,7 +40,6 @@ jobs:
         ssh -vT root@101.200.160.131 << 'EOF'
           # 切换到应用目录
           cd /root/deploy/nest-ea/
-          ls -la
           # 设置环境变量 DATE_TAG
           export DATE_TAG=$(date +%Y%m%d)
           # 停止并移除现有的容器
