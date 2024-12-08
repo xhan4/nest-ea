@@ -4,8 +4,10 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import envConfig from '../config/env';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PostsModule } from './posts/posts.module';
-import {PostsEntity} from './posts/entities/post.entity'
+import { UserController } from './modules/user/user.controller';
+import { UserModule } from './modules/user/user.module';
+import { AuthController } from './modules/auth/auth.controller';
+import { AuthModule } from './modules/auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -17,7 +19,7 @@ import {PostsEntity} from './posts/entities/post.entity'
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'mysql', // 数据库类型
-        entities: [PostsEntity], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
+        entities: [], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
         host: configService.get('DB_HOST'), // 主机，默认为localhost
         port: configService.get<number>('DB_PORT'), // 端口号
         username: configService.get('DB_USER'), // 用户名
@@ -27,9 +29,10 @@ import {PostsEntity} from './posts/entities/post.entity'
         synchronize: true, //根据实体自动创建数据库表， 生产环境建议关闭
       }),
     }),
-    PostsModule,
+    UserModule,
+    AuthModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, UserController, AuthController],
   providers: [AppService],
 })
 export class AppModule {}
