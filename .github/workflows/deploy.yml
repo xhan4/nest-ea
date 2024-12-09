@@ -30,7 +30,7 @@ jobs:
     # 上传源代码到服务器，并排除 .git 目录
     - name: Upload source code to server (excluding .git)
       run: |
-        rsync -av --exclude='.git' ./ root@101.200.160.131:/root/deploy/nest-ea/
+        rsync -av --exclude='.git' --delete ./ root@101.200.160.131:/root/deploy/nest-ea/
         
     # 部署到服务器
     - name: Deploy Docker containers to server
