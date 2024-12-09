@@ -4,10 +4,9 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import envConfig from '../config/env';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserController } from './modules/user/user.controller';
 import { UserModule } from './modules/user/user.module';
-import { AuthController } from './modules/auth/auth.controller';
-import { AuthModule } from './modules/auth/auth.module';
+import { User } from './modules/user/entiry/user.entity';
+import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,7 +18,7 @@ import { AuthModule } from './modules/auth/auth.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'mysql', // 数据库类型
-        entities: [], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
+        entities: [User], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
         host: configService.get('DB_HOST'), // 主机，默认为localhost
         port: configService.get<number>('DB_PORT'), // 端口号
         username: configService.get('DB_USER'), // 用户名
@@ -29,10 +28,22 @@ import { AuthModule } from './modules/auth/auth.module';
         synchronize: true, //根据实体自动创建数据库表， 生产环境建议关闭
       }),
     }),
+    JwtModule.registerAsync({
+      global: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          secret: configService.get('JWT_SECRET'),
+          signOptions: {
+            expiresIn: configService.get('JWT_EXP'),
+          },
+        };
+      },
+    }),
     UserModule,
-    AuthModule,
   ],
-  controllers: [AppController, UserController, AuthController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
