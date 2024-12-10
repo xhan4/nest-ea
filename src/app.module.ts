@@ -5,7 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import envConfig from '../config/env';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
-import { User } from './modules/user/entiry/user.entity';
+import { User } from './modules/user/entity/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [
