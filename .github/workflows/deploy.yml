@@ -10,6 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+     # 镜像Github组织仓库到Gitee
+    - name: Mirror the Github organization repos to Gitee.
+      uses: Yikun/hub-mirror-action@master
+      with:
+        src: 'github/xhan4'
+        dst: 'gitee/fuming1'
+        dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+        dst_token:  ${{ secrets.GITEE_TOKEN }}
+        static_list: "learn-typescript"
+        force_update: true
+
     # 检出代码
     - name: Checkout code
       uses: actions/checkout@v3
