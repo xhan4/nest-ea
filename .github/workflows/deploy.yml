@@ -6,11 +6,10 @@ on:
       - master  # 监听 master 分支的推送
 
 jobs:
-  deploy:
+ sync-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-     # 镜像Github组织仓库到Gitee
+      # 镜像Github组织仓库到Gitee
     - name: Mirror the Github organization repos to Gitee.
       uses: Yikun/hub-mirror-action@master
       with:
@@ -18,13 +17,17 @@ jobs:
         dst: 'gitee/fuming1'
         dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
         dst_token:  ${{ secrets.GITEE_TOKEN }}
-        static_list: "learn-typescript"
+        static_list: "nest-ea"
         force_update: true
-
+    #目录权限
+    - name: Reset permissions for checkout
+      run: |
+        sudo chown -R runner:runner /home/runner/work/nest-ea/nest-ea
+        sudo chmod -R 755 /home/runner/work/nest-ea/nest-ea
     # 检出代码
     - name: Checkout code
       uses: actions/checkout@v3
-
+  
     # 设置 SSH 密钥以便进行远程连接
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.3
