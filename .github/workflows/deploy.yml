@@ -12,7 +12,7 @@ jobs:
     steps:
      # 镜像Github组织仓库到Gitee
     - name: Mirror the Github organization repos to Gitee.
-      uses: Yikun/hub-mirror-action@master
+      uses: xhan4/nest-ea@master
       with:
         src: 'github/xhan4'
         dst: 'gitee/fuming1'
