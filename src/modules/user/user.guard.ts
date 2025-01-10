@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 interface CustomRequest extends Request {
   headers: {
     authorization?: string;
@@ -40,8 +40,17 @@ export class UserGuard implements CanActivate {
         secret: this.configService.get('JWT_SECRET')
       })
       request['user'] = payload; // 将解析后的用户信息存储在请求对象中
-    } catch {
-      throw new HttpException('token验证失败', HttpStatus.FORBIDDEN); // token验证失败，抛出异常
+    } catch(error) {
+      if (error instanceof TokenExpiredError) {
+        // Token 过期的情况，返回刷新 Token 的专用返回码 408
+        throw new HttpException(
+          'Token已过期，请重新登录或刷新Token',
+          HttpStatus.REQUEST_TIMEOUT, // 这里可以返回 408 或其他合适的状态码
+        );
+      } else {
+        // 如果是其他错误（如无效Token），返回 403
+        throw new HttpException('Token验证失败', HttpStatus.FORBIDDEN);
+      }
     }
     return true;
   }

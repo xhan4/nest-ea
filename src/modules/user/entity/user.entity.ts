@@ -1,6 +1,7 @@
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 import * as crypto from "crypto";
 import encryption from "src/utils/crypto";
+
 @Entity("tb_user")
 export class User {
     @PrimaryGeneratedColumn() // 标记为主列，值自动生成
@@ -20,7 +21,7 @@ export class User {
     role:string;
   
 
-    @Column({nullable:true})
+    @Column({ default: () => `用户${generateRandomString(6)}` })
     nickname:string;
 
     @Column({nullable: true})
@@ -40,4 +41,11 @@ export class User {
       this.salt = crypto.randomBytes(4).toString("base64");
       this.password = encryption(this.password, this.salt);
     }
+
+}
+
+function generateRandomString(length: number): string {
+  return crypto.randomBytes(Math.ceil(length / 2))
+    .toString('hex')
+    .slice(0, length);
 }

@@ -37,7 +37,11 @@ export class UserService {
    }
    async login(loginDto: CreateUserDto) {
     const { username, password } = loginDto;
-    const user = await this.userRepository.findOne({where:{username}});
+    const user = await this.userRepository.findOne({where: [
+      { username: username },
+      { nickname: username }
+  ]});
+    
     if(!user){
       throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
     }
