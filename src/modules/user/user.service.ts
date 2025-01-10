@@ -44,8 +44,50 @@ export class UserService {
     if (user.password !== encryption(password, user.salt)) {
       throw new HttpException('密码错误', HttpStatus.BAD_REQUEST);
     }
-    const payload = { username: user.username, sub: user.id };
-    return await this.jwtService.signAsync(payload);
+    const payload = { username: user.username, id: user.id };
+    const token = this.jwtService.sign(payload,{expiresIn:'2h'});
+    const refreshToken = this.jwtService.sign({id: user.id},{expiresIn:'7d'})
+    return {token,refreshToken}
+  }
+
+   // 刷新token
+   async refreshToken(refresh_token: string) {
+    try {
+      // 验证refresh_token
+      const decoded = this.jwtService.verify(refresh_token);
+
+      // 获取用户信息
+      const user = await this.userRepository.findOne({
+        where: {
+          id: decoded.id,
+        },
+      });
+
+      // 生成access_token
+      const token = this.jwtService.sign(
+        {
+          username: user.username,
+          id: decoded.id,
+        },
+        {
+          expiresIn: '2h', // 30分钟
+        },
+      );
+
+      // 生成refresh_token
+      const newRefreshToken = this.jwtService.sign(
+        {
+          id: decoded.id,
+        },
+        {
+          expiresIn: '7d', // 7天
+        },
+      );
+
+      return { data: { refreshToken: newRefreshToken, token } };
+    } catch (error) {
+      throw new HttpException('refresh_token已过期', HttpStatus.BAD_REQUEST);
+    }
   }
 }
 

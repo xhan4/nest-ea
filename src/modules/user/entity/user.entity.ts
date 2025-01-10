@@ -16,7 +16,7 @@ export class User {
     @Column({nullable:true})
     avatar:string;
 
-    @Column()
+    @Column({default:"0"})
     role:string;
   
 

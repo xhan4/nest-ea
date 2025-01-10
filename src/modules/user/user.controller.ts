@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Public } from '../public.decorator';
@@ -17,11 +17,18 @@ export class UserController {
     @Public()
     @Post('login')
     login(@Body() loginDto:CreateUserDto){
-         this.userService.login(loginDto)
+        return this.userService.login(loginDto)
+    }
+
+    //查询用户详细信息
+    @Get("/getUserInfo")
+    getUserInfo(@Req() req) {
+        const userId = req.user.userId; 
+        return this.userService.findOne(userId);
     }
 
     //根据id查询用户信息
-    @Get("/user/:id")
+    @Get("/:id")
     getUser(@Param('id', ParseIntPipe) id: number) {
         return this.userService.findOne(id)
     }
