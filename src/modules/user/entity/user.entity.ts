@@ -21,7 +21,7 @@ export class User {
     role:string;
   
 
-    @Column({ default: () => `用户${generateRandomString(6)}` })
+    @Column({ default:"用户"+generateRandomString(6)})
     nickname:string;
 
     @Column({nullable: true})
