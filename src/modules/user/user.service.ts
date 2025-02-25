@@ -55,7 +55,7 @@ export class UserService {
       throw new HttpException('无权访问该应用', HttpStatus.FORBIDDEN);
      }
     const payload = { username: user.username, id: user.id, app_id: user.app_id };
-    const token = this.jwtService.sign(payload,{expiresIn:'2s'});
+    const token = this.jwtService.sign(payload,{expiresIn:'2h'});
     const refreshToken = this.jwtService.sign({id: user.id},{expiresIn:'7d'})
     return {token,refreshToken}
   }
@@ -84,7 +84,7 @@ export class UserService {
           id: decoded.id,
         },
         {
-          expiresIn: '2h', // 30分钟
+          expiresIn: '2h', // 2小时
         },
       );
 
