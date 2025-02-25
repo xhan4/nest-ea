@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { RefreshUserDto } from './dto/refresh-user.dto';
 import { Public } from '../public.decorator';
 
 @Controller('user')
@@ -16,8 +18,15 @@ export class UserController {
     //登录用户
     @Public()
     @Post('login')
-    login(@Body() loginDto:CreateUserDto){
+    login(@Body() loginDto:LoginUserDto){
         return this.userService.login(loginDto)
+    }
+    
+    //刷新token
+    @Public()
+    @Post('refreshToken')
+    refreshToken(@Body() loginDto:RefreshUserDto){
+          return this.userService.refreshToken(loginDto)
     }
 
     //查询用户详细信息

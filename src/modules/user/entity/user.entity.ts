@@ -7,6 +7,9 @@ export class User {
     @PrimaryGeneratedColumn() // 标记为主列，值自动生成
     id:number;
 
+    @Column({ nullable: false }) // 添加 app_id 列
+    app_id: string; // 用于区分不同应用的用户
+    
     @Column({ length: 30 })
     @Unique(['username'])
     username:string;

@@ -23,11 +23,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const errorResponse = {
       data: {},
       msg: validMessage || message,
-      code: -1,
+      code:status==408?408:-1,
     };
 
     // 设置返回的状态码， 请求头，发送错误信息
-    response.status(status);
+    response.status(status==408?401:status);
     response.header('Content-Type', 'application/json; charset=utf-8');
     response.send(errorResponse);
   }

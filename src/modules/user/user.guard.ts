@@ -32,7 +32,8 @@ export class UserGuard implements CanActivate {
     }
     const request = context.switchToHttp().getRequest();//获取请求对象
     const token = this.extractTokenFromHeader(request);
-    if (!token) {
+    const appId = request.headers['x-app-id'];//获取请求的app_id
+    if (!token||!appId) {
       throw new HttpException('验证不通过', HttpStatus.FORBIDDEN);//如果没有token,抛出验证不通过异常
     }
     try {

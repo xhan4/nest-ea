@@ -11,4 +11,8 @@ export class CreateUserDto {
     message: "密码不能少于6位",
   })
   password: string;
+  @IsNotEmpty({
+    message: "appId不能为空",
+  })
+  app_id: string;
 }
