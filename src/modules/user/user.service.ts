@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entity/user.entity';
+import { User } from '../../entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -49,7 +49,7 @@ export class UserService {
       throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
     }
     if (user.password !== encryption(password, user.salt)) {
-      throw new HttpException('密码错误', HttpStatus.BAD_REQUEST);
+      throw new HttpException('用户名或密码错误', HttpStatus.BAD_REQUEST);
     }
     if (user.app_id !== app_id) {
       throw new HttpException('无权访问该应用', HttpStatus.FORBIDDEN);

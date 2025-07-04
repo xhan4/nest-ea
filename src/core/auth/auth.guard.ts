@@ -8,7 +8,7 @@ interface CustomRequest extends Request {
   } & Request['headers'];
 }
 @Injectable()
-export class UserGuard implements CanActivate {
+export class AuthGuard implements CanActivate {
 
   constructor(
     private jwtService: JwtService,//JWT服务，用于验证和解析JWT token

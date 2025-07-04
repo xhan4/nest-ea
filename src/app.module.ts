@@ -5,8 +5,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import envConfig from '../config/env';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
-import { User } from './modules/user/entity/user.entity';
+import { User } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthGuard } from './core/auth/auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -44,6 +46,9 @@ import { JwtModule } from '@nestjs/jwt';
     UserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,{
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+  }],
 })
 export class AppModule {}
