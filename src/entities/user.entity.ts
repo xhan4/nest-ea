@@ -3,6 +3,7 @@ import * as crypto from "crypto";
 import encryption from "src/utils/crypto";
 import { Item } from "./item.entity";
 import { Trade } from "./trade.entity";
+import { Inventory } from "./inventory.entity";
 
 @Entity("tb_user")
 export class User {
@@ -57,6 +58,9 @@ export class User {
 
   @OneToMany(() => Trade, trade => trade.buyer)
   buyTrades: Trade[];
+
+  @OneToMany(() => Inventory, inventory => inventory.user)
+  inventoryItems: Inventory[];
 }
 
 function generateRandomString(length: number): string {

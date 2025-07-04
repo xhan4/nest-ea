@@ -1,10 +1,12 @@
 import { WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 
-@WebSocketGateway({
+@WebSocketGateway(3006, { // 明确指定端口
   cors: {
     origin: '*',
+    methods: ['GET', 'POST'],
   },
+  transports: ['websocket']
 })
 export class NotifyGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private connectedClients = new Map<number, Socket>();

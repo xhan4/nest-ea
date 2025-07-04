@@ -17,6 +17,7 @@ import { Inventory } from './entities/inventory.entity';
 import { Item } from './entities/item.entity';
 import { Notification } from './entities/notification.entity';
 import { Trade } from './entities/trade.entity';
+import { NotifyModule } from './core/notify/notify.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -55,7 +56,8 @@ import { Trade } from './entities/trade.entity';
     InventoryModule,
     ItemModule,
     NotificationModule,
-    TradeModule
+    TradeModule,
+    NotifyModule
   ],
   controllers: [AppController],
   providers: [AppService,{

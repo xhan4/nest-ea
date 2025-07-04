@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Post,  } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { InventoryService } from "./inventory.service";
 import { ListItemDto } from "./dto/list-item.dto";
+import { AddItemDto } from "./dto/add-item.dto";
 
 @Controller('inventory')
 export class InventoryController {
@@ -21,5 +22,11 @@ export class InventoryController {
   async listItem(@Body() listItem:ListItemDto) {
     const {userId, itemId, price} = listItem
     return this.service.listItem(userId, itemId, price);
+  }
+
+  @Post('/addItem')
+  async addItem(@Body() addItemDto: AddItemDto) {
+    const { userId, itemId, count } = addItemDto;
+    return this.service.addItemToInventory(userId, itemId, count);
   }
 }
