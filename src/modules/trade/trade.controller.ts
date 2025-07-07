@@ -1,6 +1,5 @@
 import { Body, Controller, Param, Post, Req } from "@nestjs/common";
 import { TradeService } from "./trade.service";
-import { BuyItemDto } from "./dto/buy-item.dto";
 
 @Controller('trade')
 export class TradeController {
@@ -10,19 +9,24 @@ export class TradeController {
   @Post('list')
   async listItem(
     @Body('itemId') itemId: number,
-    @Body('quantity') quantity: number,
-    @Body('pricePerUnit') pricePerUnit: number,
+    @Body('count') count: number,
+    @Body('price') price: number,
     @Req() req,
   ) {
     const sellerId = req.user.id;
-    return this.tradeService.listItem(sellerId, itemId, quantity, pricePerUnit);
+    return this.tradeService.listItem(sellerId, itemId, count, price);
   }
 
   // 买家购买物品
   @Post('buy/:tradeId')
-  async buyItem(@Param('tradeId') tradeId: number, @Req() req) {
+  async buyItem(
+    @Param('tradeId') tradeId: number,
+    @Body('count') count: number, // 新增参数，用于指定购买数量
+    @Req() req
+  ) {
     const buyerId = req.user.id;
-    return this.tradeService.buyItem(buyerId, tradeId);
+    // 如果未传入 count，默认购买全部
+    return this.tradeService.buyItem(buyerId, tradeId, count);
   }
 
   // 买家领取物品

@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 import { Trade, TradeStatus } from "src/entities/trade.entity";
-import { Repository, EntityManager } from "typeorm";
 import { User } from "src/entities/user.entity";
 import { Item } from "src/entities/item.entity";
 import { Inventory } from "src/entities/inventory.entity";
-import { NotifyGateway } from '../notify/notify.gateway';
+
 import { MailService } from "../mail/mail.service";
 import { Transaction } from "src/entities/transaction.entity";
 
@@ -14,15 +14,6 @@ export class TradeService {
   constructor(
     @InjectRepository(Trade)
     private tradeRepo: Repository<Trade>,
-    @InjectRepository(User)
-    private userRepo: Repository<User>,
-    @InjectRepository(Item)
-    private itemRepo: Repository<Item>,
-    @InjectRepository(Inventory)
-    private inventoryRepo: Repository<Inventory>,
-    @InjectRepository(Transaction)
-    private transactionRepo: Repository<Transaction>,
-    private readonly notifyGateway: NotifyGateway,
     private mailService: MailService
   ) {}
 
@@ -58,7 +49,7 @@ export class TradeService {
   }
 
   // 买家购买物品
-  async buyItem(buyerId: number, tradeId: number, feeRate = 0.05) {
+  async buyItem(buyerId: number, tradeId: number, count?: number) {
     return this.tradeRepo.manager.transaction(async (manager) => {
       const [buyer, trade] = await Promise.all([
         manager.findOne(User, { where: { id: buyerId } }),
@@ -72,7 +63,15 @@ export class TradeService {
         throw new HttpException('无效的购买请求', HttpStatus.BAD_REQUEST);
       }
 
-      const totalPrice = trade.pricePerUnit * trade.quantity;
+      // 如果未传入 count，默认购买全部
+      const purchaseCount = count || trade.quantity;
+
+      if (purchaseCount > trade.quantity) {
+        throw new HttpException('购买数量超过可售数量', HttpStatus.BAD_REQUEST);
+      }
+
+      const totalPrice = trade.pricePerUnit * purchaseCount;
+      const feeRate = 0.05;
       const fee = totalPrice * feeRate;
       const sellerEarnings = totalPrice - fee;
 
@@ -85,15 +84,22 @@ export class TradeService {
         balance: () => `balance - ${totalPrice}`,
       });
 
-      // 更新交易状态
-      await manager.update(Trade, tradeId, {
-        status: TradeStatus.SOLD,
-        soldAt: new Date(),
-        totalPrice,
-        fee,
-        sellerEarnings,
-        buyer
-      });
+      if (purchaseCount === trade.quantity) {
+        // 全部购买，更新交易状态为已售出
+        await manager.update(Trade, tradeId, {
+          status: TradeStatus.SOLD,
+          soldAt: new Date(),
+          totalPrice,
+          fee,
+          sellerEarnings,
+          buyer
+        });
+      } else {
+        // 部分购买，更新可售数量
+        await manager.update(Trade, tradeId, {
+          quantity: trade.quantity - purchaseCount,
+        });
+      }
 
       // 创建交易记录
       const transaction = await manager.save(Transaction, {
@@ -101,7 +107,7 @@ export class TradeService {
         seller: trade.seller,
         item: trade.item,
         trade,
-        quantity: trade.quantity,
+        quantity: purchaseCount,
         totalPrice,
         fee,
         sellerEarnings,
@@ -112,10 +118,9 @@ export class TradeService {
       await this.mailService.sendBuyerMail(
         buyer,
         trade.item,
-        trade.quantity,
+        purchaseCount,
         transaction.id,
       );
-  
       await this.mailService.sendSellerMail(
         trade.seller,
         sellerEarnings,
