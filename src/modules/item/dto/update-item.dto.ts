@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsString, IsNumber, IsPositive, IsOptional } from 'class-validator';
 
 export class UpdateItemDto {
@@ -9,6 +10,7 @@ export class UpdateItemDto {
   @IsOptional()
   description?: string;
 
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   @IsPositive()
   @IsOptional()

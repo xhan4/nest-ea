@@ -15,4 +15,16 @@ export class Inventory {
 
     @Column()
     count: number;
+
+    @Column({ default: false })
+    isTrading: boolean;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+    price: number;
+
+    @Column({ type: 'timestamp', nullable: true })
+    lastTradeTime: Date;
+
+    @Column({ default: 0 })
+    tradingCount: number; // 新增字段，记录正在交易中的数量
 }

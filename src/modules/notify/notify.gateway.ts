@@ -1,24 +1,26 @@
 import { WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 
-@WebSocketGateway(3006, { // 明确指定端口
+@WebSocketGateway({ // 明确指定端口
   cors: {
     origin: '*',
-    methods: ['GET', 'POST'],
   },
-  transports: ['websocket']
+   path: '/ws',     // 命名空间
+   transports: ['websocket'],
 })
 export class NotifyGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private connectedClients = new Map<number, Socket>();
 
   handleConnection(client: Socket) {
     const userId = client.handshake.query.userId;
+    console.log(client.handshake.query)
     if (userId) {
       this.connectedClients.set(Number(userId), client);
     }
   }
 
   handleDisconnect(client: Socket) {
+     console.log(client.handshake.query)
     const userId = client.handshake.query.userId;
     if (userId) {
       this.connectedClients.delete(Number(userId));
@@ -26,6 +28,7 @@ export class NotifyGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   sendToUser(userId: number, event: string, data: any) {
+     console.log(userId)
     const client = this.connectedClients.get(userId);
     if (client) {
       client.emit(event, data);

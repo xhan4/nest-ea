@@ -1,8 +1,7 @@
 import { Transform } from 'class-transformer';
-import { IsNumber, IsPositive } from 'class-validator';
+import { IsBoolean, IsNumber, IsPositive } from 'class-validator';
 
-export class ListItemDto {
-
+export class CompleteTradeDto {
   @Transform(({ value }) => Number(value))
   @IsNumber()
   @IsPositive()
@@ -11,10 +10,9 @@ export class ListItemDto {
   @Transform(({ value }) => Number(value))
   @IsNumber()
   @IsPositive()
-  price: number;
-
-  @Transform(({ value }) => Number(value))
-  @IsNumber()
-  @IsPositive()
   count: number;
+
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  isSuccess: boolean;
 }

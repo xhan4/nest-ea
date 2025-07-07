@@ -11,13 +11,13 @@ import { AuthGuard } from './core/auth/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { ItemModule } from './modules/item/item.module';
-import { NotificationModule } from './modules/notification/notification.module';
+import { MailModule } from './modules/mail/mail.module';
 import { TradeModule } from './modules/trade/trade.module';
 import { Inventory } from './entities/inventory.entity';
 import { Item } from './entities/item.entity';
-import { Notification } from './entities/notification.entity';
 import { Trade } from './entities/trade.entity';
-import { NotifyModule } from './core/notify/notify.module';
+import { NotifyModule } from './modules/notify/notify.module';
+import { Mail } from './entities/mail.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,7 +29,7 @@ import { NotifyModule } from './core/notify/notify.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'mysql', // 数据库类型
-        entities: [User,Inventory,Item,Notification,Trade], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
+        entities: [User,Inventory,Item,Mail,Trade], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
         host: configService.get('DB_HOST'), // 主机，默认为localhost
         port: configService.get<number>('DB_PORT'), // 端口号
         username: configService.get('DB_USER'), // 用户名
@@ -55,7 +55,7 @@ import { NotifyModule } from './core/notify/notify.module';
     UserModule,
     InventoryModule,
     ItemModule,
-    NotificationModule,
+    MailModule,
     TradeModule,
     NotifyModule
   ],

@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsString, IsNumber, IsPositive, IsOptional } from 'class-validator';
 
 export class CreateItemDto {
@@ -11,6 +12,7 @@ export class CreateItemDto {
   @IsString()
   type: string;
 
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   @IsPositive()
   rarity: number;
