@@ -27,8 +27,7 @@ export class NotifyGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  sendToUser(userId: number, event: string, data: any) {
-     console.log(userId)
+  sendNotify(userId: number, event: string, data: any) {
     const client = this.connectedClients.get(userId);
     if (client) {
       client.emit(event, data);

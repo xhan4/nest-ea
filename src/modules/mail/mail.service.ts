@@ -5,14 +5,14 @@ import { User } from '../../entities/user.entity';
 import { Item } from '../../entities/item.entity';
 import { Mail, MailAttachmentType } from '../../entities/mail.entity';
 import { Inventory } from '../../entities/inventory.entity';
+import { NotifyGateway } from '../notify/notify.gateway';
 
 @Injectable()
 export class MailService {
   constructor(
     @InjectRepository(Mail)
     private mailRepo: Repository<Mail>,
-    @InjectRepository(Inventory)
-    private inventoryRepo: Repository<Inventory>,
+    private notifyGateway: NotifyGateway
   ) {}
 
   async sendBuyerMail(buyer: User, item: Item, quantity: number, transactionId: number) {
@@ -25,6 +25,18 @@ export class MailService {
       goldAttachment: null,
       sentAt: new Date(),
     });
+        // 发送实时通知
+    this.notifyGateway.sendNotify(
+      buyer.id,
+      'new_mail',
+      {
+        mailId: mail.id,
+        subject: mail.subject,
+        content: mail.content,
+        sentAt: mail.sentAt,
+        transactionId
+      }
+    );
     return mail;
   }
 
@@ -38,6 +50,19 @@ export class MailService {
       goldAttachment: earnings,
       sentAt: new Date(),
     });
+    
+    // 发送实时通知
+    this.notifyGateway.sendNotify(
+      seller.id,
+      'new_mail',
+      {
+        mailId: mail.id,
+        subject: mail.subject,
+        content: mail.content,
+        sentAt: mail.sentAt,
+        transactionId
+      }
+    );
     return mail;
   }
 

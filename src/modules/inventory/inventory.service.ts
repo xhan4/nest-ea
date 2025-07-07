@@ -47,52 +47,6 @@ export class InventoryService {
     });
   }
 
-  async listItem(userId: number, itemId: number, price: number, count: number) {
-    try {
-      // 1. 检查库存中是否存在该物品
-      const inventoryItem = await this.inventoryRepo.findOne({
-        where: {
-          user: { id: userId },
-          item: { id: itemId }
-        }
-      });
-
-      if (!inventoryItem) {
-        throw new NotFoundException(`库存中不存在物品 ${itemId}`);
-      }
-
-      // 2. 检查可用数量是否足够
-      const availableCount = inventoryItem.count - inventoryItem.tradingCount;
-      if (availableCount < count) {
-        throw new ConflictException(`物品 ${itemId} 可用数量不足，当前可用: ${availableCount}`);
-      }
-
-      // 3. 执行更新
-      const result = await this.inventoryRepo.update(
-        { id: inventoryItem.id },
-        {
-          isTrading: true,
-          price,
-          lastTradeTime: new Date(),
-          tradingCount: inventoryItem.tradingCount + count // 增加交易中数量
-        }
-      );
-
-      // 4. 处理更新结果
-      if (result.affected === 0) {
-        throw new InternalServerErrorException('更新失败，请稍后重试');
-      }
-      return {
-        success: true,
-        itemId,
-        newPrice: price,
-        tradingCount: count
-      };
-    } catch (error) {
-      throw error;
-    }
-}
-
   async addItemToInventory(userId: number, itemId: number, count: number) {
     return this.inventoryRepo.manager.transaction(async (manager) => {
       // 查找是否已有该物品
@@ -118,32 +72,5 @@ export class InventoryService {
         return manager.save(newItem);
       }
     });
-  }
-
-  async completeTrade(userId: number, itemId: number, count: number, isSuccess: boolean) {
-      const inventoryItem = await this.inventoryRepo.findOne({
-        where: {
-          user: { id: userId },
-          item: { id: itemId }
-        }
-      });
-  
-      if (!inventoryItem) {
-        throw new NotFoundException(`库存中不存在物品 ${itemId}`);
-      }
-  
-      if (inventoryItem.tradingCount < count) {
-        throw new ConflictException(`交易中数量不足`);
-      }
-  
-      await this.inventoryRepo.update(
-        { id: inventoryItem.id },
-        {
-          isTrading: inventoryItem.tradingCount - count > 0,
-          tradingCount: inventoryItem.tradingCount - count,
-          count: isSuccess ? inventoryItem.count - count : inventoryItem.count,
-          lastTradeTime: new Date()
-        }
-      );
   }
 }

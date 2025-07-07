@@ -115,6 +115,7 @@ export class TradeService {
         trade.quantity,
         transaction.id,
       );
+  
       await this.mailService.sendSellerMail(
         trade.seller,
         sellerEarnings,

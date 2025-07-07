@@ -3,13 +3,14 @@ import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Mail } from 'src/entities/mail.entity';
-import { Inventory } from 'src/entities/inventory.entity';
+import { NotifyModule } from '../notify/notify.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Mail, Inventory]) // 注册 Mail 和 Inventory 实体
+    TypeOrmModule.forFeature([Mail]),
+    NotifyModule,
   ],
   controllers: [MailController],
-  providers: [MailService]
+  providers: [MailService],
 })
 export class MailModule {}
