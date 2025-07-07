@@ -16,6 +16,7 @@ export class MailService {
   ) {}
 
   async sendBuyerMail(buyer: User, item: Item, quantity: number, transactionId: number) {
+    console.log('12323')
     const mail = await this.mailRepo.save({
       recipient: buyer,
       subject: '物品购买成功',

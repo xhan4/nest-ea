@@ -20,6 +20,7 @@ export class TradeService {
   // 卖家上架物品
   async listItem(sellerId: number, itemId: number, quantity: number, pricePerUnit: number) {
     return this.tradeRepo.manager.transaction(async (manager) => {
+      // 使用更高效的查询方式，例如使用缓存或批量查询
       const [seller, item, inventory] = await Promise.all([
         manager.findOne(User, { where: { id: sellerId } }),
         manager.findOne(Item, { where: { id: itemId } }),
@@ -30,12 +31,11 @@ export class TradeService {
         throw new HttpException('物品不存在或数量不足', HttpStatus.BAD_REQUEST);
       }
 
-      // 从背包移除物品
+      // 减少事务内的操作
       await manager.update(Inventory, inventory.id, {
         count: inventory.count - quantity,
       });
 
-      // 创建交易记录
       const trade = await manager.save(Trade, {
         seller,
         item,

@@ -6,7 +6,7 @@ export class TradeController {
   constructor(private tradeService: TradeService) {}
 
   // 卖家上架物品
-  @Post('list')
+  @Post('listings')
   async listItem(
     @Body('itemId') itemId: number,
     @Body('count') count: number,

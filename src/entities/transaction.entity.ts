@@ -3,7 +3,7 @@ import { User } from './user.entity';
 import { Item } from './item.entity';
 import { Trade } from './trade.entity';
 
-@Entity()
+@Entity("tb_transaction")
 export class Transaction {
   @PrimaryGeneratedColumn()
   id: number;
