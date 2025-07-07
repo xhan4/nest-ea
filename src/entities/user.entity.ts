@@ -1,7 +1,6 @@
 import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
 import * as crypto from "crypto";
 import encryption from "src/utils/crypto";
-import { Item } from "./item.entity";
 import { Trade } from "./trade.entity";
 import { Inventory } from "./inventory.entity";
 
@@ -50,8 +49,6 @@ export class User {
     this.salt = crypto.randomBytes(4).toString("base64");
     this.password = encryption(this.password, this.salt);
   }
-  @OneToMany(() => Item, item => item.owner)
-  items: Item[];
 
   @OneToMany(() => Trade, trade => trade.seller)
   sellTrades: Trade[];

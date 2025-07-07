@@ -8,8 +8,8 @@ export class ItemController {
   constructor(private readonly service: ItemService) {}
 
   @Post()
-  async createItem(@Body() createDto: CreateItemDto, @Req() req) {
-    return this.service.createItem(createDto, req.user.id);
+  async createItem(@Body() createDto: CreateItemDto) {
+    return this.service.createItem(createDto);
   }
 
   @Put(':id')

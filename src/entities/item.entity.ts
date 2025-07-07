@@ -11,9 +11,6 @@ export class Item {
     @Column()
     type: string;
 
-    @ManyToOne(() => User)
-    owner: User;
-
     @Column({ default: false })
     isTrading: boolean;
         

@@ -7,7 +7,7 @@ export enum MailAttachmentType {
   GOLD = 'GOLD',
 }
 
-@Entity()
+@Entity("tb_mail")
 export class Mail {
   @PrimaryGeneratedColumn()
   id: number;
