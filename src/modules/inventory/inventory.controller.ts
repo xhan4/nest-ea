@@ -1,12 +1,11 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Req } from "@nestjs/common";
 import { InventoryService } from "./inventory.service";
 import { ListItemDto } from "./dto/list-item.dto";
 import { AddItemDto } from "./dto/add-item.dto";
-import { AuthGuard } from "src/core/auth/auth.guard";
 import { CompleteTradeDto } from "./dto/complete-trade.dto";
 
 @Controller('inventory')
-@UseGuards(AuthGuard)
+
 export class InventoryController {
   constructor(private readonly service: InventoryService) {}
 

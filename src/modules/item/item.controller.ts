@@ -1,11 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Req } from "@nestjs/common";
 import { ItemService } from "./item.service";
 import { CreateItemDto } from "./dto/create-item.dto";
 import { UpdateItemDto } from "./dto/update-item.dto";
-import { AuthGuard } from "../../core/auth/auth.guard";
 
 @Controller('items')
-@UseGuards(AuthGuard)
 export class ItemController {
   constructor(private readonly service: ItemService) {}
 
