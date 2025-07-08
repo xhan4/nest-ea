@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Req, Param, Body } from '@nestjs/common';
 import { MailService } from './mail.service';
-import { MailType } from 'src/entities/mail.entity';
+import { MailType, REWARDTYPE } from 'src/entities/mail.entity';
 
 @Controller('mail')
 export class MailController {
@@ -19,12 +19,18 @@ export class MailController {
     return this.mailService.claimAttachment(mailId, userId);
   }
 
-  @Post('broadcast')
+  @Post('reward')
   async sendSystemBroadcast(
-    @Body('subject') subject: string,
-    @Body('content') content: string,
-    @Body('mailType') mailType: MailType
+    @Body('mailType') mailType:MailType,
+    @Body('subject') subject:string,
+    @Body('content') content:string,
+    @Body('userIds') userIds: number[],
+    @Body('rewards') rewards: Array<{
+      type: REWARDTYPE;
+      itemId?: number;
+      amount: number;
+    }>
   ) {
-    return this.mailService.sendSystemBroadcast(subject, content, mailType);
+    return this.mailService.sendBatchRewards(mailType,subject,content,userIds,rewards);
   }
 }

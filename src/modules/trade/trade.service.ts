@@ -124,12 +124,10 @@ export class TradeService {
         transactionResult.buyer,
         transactionResult.tradeItem,
         transactionResult.quantity,
-        transactionResult.transactionId,
       );
       await this.mailService.sendSellerMail(
         transactionResult.seller,
         transactionResult.sellerEarnings,
-        transactionResult.transactionId,
       );
 
       return { success: true, transactionId: transactionResult.transactionId };

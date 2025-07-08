@@ -8,6 +8,10 @@ export enum MailType {
   TRADE_ITEM = 'TRADE_ITEM',
   TRADE_GOLD = 'TRADE_GOLD'
 }
+export enum REWARDTYPE{
+   ITEM = 'ITEM',
+   GOLD = 'GOLD',
+}
 @Entity("tb_mail")
 export class Mail {
   @PrimaryGeneratedColumn()
@@ -33,6 +37,13 @@ export class Mail {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   goldAttachment: number;
+
+  @Column({ type: 'json', nullable: true })
+  rewards: Array<{
+    type: REWARDTYPE;
+    itemId?: number;
+    amount: number;
+  }>;
 
   @Column({ default: false })
   isRead: boolean;

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { Item } from '../../entities/item.entity';
-import { Mail, MailType } from '../../entities/mail.entity';
+import { Mail, MailType, REWARDTYPE } from '../../entities/mail.entity';
 import { Inventory } from '../../entities/inventory.entity';
 import { NotifyGateway } from '../notify/notify.gateway';
 
@@ -42,7 +42,7 @@ export class MailService {
       total,
     };
   }
-  async sendBuyerMail(buyer: User, item: Item, quantity: number, transactionId: number) {
+  async sendBuyerMail(buyer: User, item: Item, quantity: number) {
     const mail = await this.mailRepo.save({
       recipient: buyer,
       mailType: MailType.TRADE_ITEM,  // 明确指定邮件类型
@@ -84,27 +84,38 @@ export class MailService {
       if (!mail) {
         throw new Error('无效的邮件或附件已领取');
       }
-
-      if (mail.mailType === MailType.TRADE_ITEM) {
+      const claimInventItem = async (userId: number, itemId: number, count: number) => {
         const inventory = await manager.findOne(Inventory, {
-          where: { user: { id: userId }, item: { id: mail.itemAttachment.id } },
+          where: { user: { id: userId }, item: { id: itemId } },
         });
-
         if (inventory) {
           await manager.update(Inventory, inventory.id, {
-            count: inventory.count + 1,
+            count: inventory.count + count,
           });
         } else {
           await manager.save(Inventory, {
             user: { id: userId },
-            item: mail.itemAttachment,
-            count: 1,
+            item: { id: itemId },
+            count,
           });
         }
+      }
+      if (mail.mailType === MailType.TRADE_ITEM) {
+        claimInventItem(userId, mail.itemAttachment.id, mail.quantity)
       } else if (mail.mailType === MailType.TRADE_GOLD) {
         await manager.update(User, userId, {
           balance: () => `balance + ${mail.goldAttachment}`,
         });
+      } else if (mail.mailType === MailType.SYSTEM_AWARD) {
+        for (const reward of mail.rewards) {
+          if (reward.type === REWARDTYPE.ITEM) {
+            await claimInventItem(userId, reward.itemId, reward.amount)
+          } else if (reward.type === REWARDTYPE.GOLD) {
+            await manager.update(User, userId, {
+              balance: () => `balance + ${reward.amount}`,
+            });
+          }
+        }
       }
 
       await manager.update(Mail, mailId, {
@@ -115,20 +126,30 @@ export class MailService {
     });
   }
 
-  async sendSystemBroadcast(
+  async sendBatchRewards(
+    mailType: MailType,
     subject: string,
     content: string,
-    mailType: MailType,
+    userIds: number[],
+    rewards: Array<{
+      type: REWARDTYPE;
+      itemId?: number;
+      amount: number;
+    }>
   ) {
-    const mail = await this.mailRepo.save({
-      mailType,
-      subject,
-      content,
-      itemAttachment: null,
-      goldAttachment: null,
-      sentAt: new Date()
+    return this.mailRepo.manager.transaction(async (manager) => {
+      const mails = userIds.map(userId => {
+        return manager.save({
+          recipient: userId,
+          mailType,
+          subject,
+          content,
+          rewards,
+          sentAt: new Date(),
+        });
+      });
+      await Promise.all(mails);
+      this.notifyGateway.server.emit('new_mail', {});
     });
-    this.notifyGateway.server.emit('new_mail', {});
-    return mail;
   }
 }
