@@ -12,8 +12,8 @@ export class InventoryService {
     @InjectRepository(Item)
     private itemRepo: Repository<Item> // 添加 ItemRepository
   ) { }
-  async getUserItems(userId: number, page: number = 1,pageSize: number = 10) {
-    const skip = (page - 1) * pageSize;
+  async getUserItems(userId: number, current: number = 1,pagesize: number = 10) {
+    const skip = (current - 1) * pagesize;
      const [inventoryItems, total] = await this.inventoryRepo.findAndCount({
       where: {
         user: { id: userId },
@@ -21,7 +21,7 @@ export class InventoryService {
       },
       relations: ['item'],
       skip,
-      take: pageSize
+      take: pagesize
     });
     // 4. 平铺数据结构
   const flatItems = inventoryItems.map(item => ({

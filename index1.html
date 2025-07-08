@@ -88,6 +88,17 @@
                 console.error('获取仓库失败:', error);
             }
         }
+                async function getMails() {
+            try {
+                const response = await fetch(`${API_BASE}/mail/list`, {
+                    headers: { ...defaultHeaders, 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                console.log(data,'data')
+            } catch (error) {
+            }
+        }
+        getMails()
         getInventory()
         async function listItem() {
             const itemId = document.getElementById('itemSelect').value;

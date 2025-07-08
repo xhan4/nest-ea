@@ -11,22 +11,25 @@ export class UserController {
     //注册用户
     @Public()
     @Post('register')
-    create(@Body() createUserDto: CreateUserDto) {
-
-        return this.userService.registe(createUserDto);
+    create(@Body() createUserDto: CreateUserDto,@Req() req) {
+        const appId = req.headers['x-app-id']
+        return this.userService.registe({...createUserDto,appId});
     }
     //登录用户
     @Public()
     @Post('login')
-    login(@Body() loginDto:LoginUserDto){
-        return this.userService.login(loginDto)
+    login(@Body() loginDto:LoginUserDto,@Req() req){
+        const appId = req.headers['x-app-id']
+        const {username,password} = loginDto
+        return this.userService.login({username,password,appId})
     }
     
     //刷新token
     @Public()
     @Post('refreshToken')
-    refreshToken(@Body() loginDto:RefreshUserDto){
-          return this.userService.refreshToken(loginDto)
+    refreshToken(@Body() loginDto:RefreshUserDto,@Req() req){
+          const appId = req.headers['x-app-id']
+          return this.userService.refreshToken({...loginDto,appId})
     }
 
     //查询用户详细信息

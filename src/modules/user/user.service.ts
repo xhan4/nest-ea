@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
 import { Repository } from 'typeorm';
@@ -23,7 +23,7 @@ export class UserService {
     return this.userRepository.find()
   }
   async registe(createUserDto: CreateUserDto) {
-    const { username, password, app_id } = createUserDto;
+    const { username, password, appId } = createUserDto;
     const existUser = await this.userRepository.findOne({ where: { username } });
     if (existUser) {
       throw new HttpException('用户已存在', HttpStatus.BAD_REQUEST);
@@ -35,7 +35,7 @@ export class UserService {
         nickname:randomNickName(6),
         salt:salt,
         password: encryption(password,salt),
-        app_id
+        appId
       });
       return '注册成功';
     } catch (error) {
@@ -43,7 +43,7 @@ export class UserService {
     }
   }
   async login(loginDto: LoginUserDto) {
-    const { username, password, app_id } = loginDto;
+    const { username, password, appId } = loginDto;
     const user = await this.userRepository.findOne({
       where: [
         { username: username },
@@ -57,10 +57,10 @@ export class UserService {
     if (user.password !== encryption(password, user.salt)) {
       throw new HttpException('用户名或密码错误', HttpStatus.BAD_REQUEST);
     }
-    if (user.app_id !== app_id) {
+    if (user.appId !== appId) {
       throw new HttpException('无权访问该应用', HttpStatus.FORBIDDEN);
     }
-    const payload = { username: user.username, id: user.id, app_id: user.app_id };
+    const payload = { username: user.username, id: user.id, appId: user.appId };
     const token = this.jwtService.sign(payload, { expiresIn: this.configService.get("JWT_EXP") });
     const refreshToken = this.jwtService.sign({ id: user.id }, { expiresIn: this.configService.get("JWT_REFRESH_EXP") })
     return { token, refreshToken }
@@ -68,7 +68,7 @@ export class UserService {
 
   // 刷新token
   async refreshToken(refreshDto: RefreshUserDto) {
-    const { refresh_token, app_id } = refreshDto;
+    const { refresh_token, appId } = refreshDto;
     try {
       const decoded = this.jwtService.verify(refresh_token);
       const user = await this.userRepository.findOne({
@@ -76,7 +76,7 @@ export class UserService {
           id: decoded.id,
         },
       });
-      if (user.app_id !== app_id) {
+      if (user.appId !== appId) {
         throw new HttpException('无权访问该应用', HttpStatus.FORBIDDEN);
       }
       const token = this.jwtService.sign(

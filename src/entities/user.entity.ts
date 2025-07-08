@@ -11,7 +11,7 @@ export class User {
   id: number;
 
   @Column({ nullable: false }) 
-  app_id: string; 
+  appId: string; 
 
   @Column({ length: 30 })
   @Unique(['username'])

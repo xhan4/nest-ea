@@ -24,15 +24,18 @@ export class Mail {
   @Column({ type: 'enum', enum: MailType, default: MailType.PERSONAL })
   mailType: MailType;
 
+  @Column({ type: 'enum', enum: MailAttachmentType, nullable: true })
+  attachmentType: MailAttachmentType;
+
   @Column()
   subject: string;
 
   @Column({ type: 'text' })  // 改为text类型支持更长的内容
   content: string;
 
-  @Column({ type: 'enum', enum: MailAttachmentType, nullable: true })
-  attachmentType: MailAttachmentType;
-
+  @Column()
+  quantity: number;
+   
   @ManyToOne(() => Item, { nullable: true })
   itemAttachment: Item;
 

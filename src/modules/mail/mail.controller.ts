@@ -6,11 +6,11 @@ import { MailAttachmentType } from '../../entities/mail.entity'; // 添加这行
 export class MailController {
   constructor(private mailService: MailService) {}
 
-  @Get('inbox')
+  @Get('list')
   async getInbox(@Req() req) {
     const userId = req.user.id;
     // 实现获取用户邮件列表逻辑
-    return [];
+    return this.mailService.getMailListById(userId);
   }
 
   @Post('claim/:mailId')
@@ -19,7 +19,7 @@ export class MailController {
     return this.mailService.claimAttachment(mailId, userId);
   }
 
-  @Post('system/broadcast')
+  @Post('broadcast')
   async sendSystemBroadcast(
     @Body('subject') subject: string,
     @Body('content') content: string,

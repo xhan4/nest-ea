@@ -9,7 +9,8 @@ export class InventoryController {
 
   @Get('/list')
   async getItemsByUser(@Req() req:any) {
-    return this.service.getUserItems(req.user.id);
+   const {current,pagesize} = req.query
+    return this.service.getUserItems(req.user.id,current,pagesize);
   }
 
   @Get('/detail/:itemId')

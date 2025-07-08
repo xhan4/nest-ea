@@ -74,8 +74,8 @@
             try {
                 const response = await fetch(`${API_BASE}/user/login`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, app_id: appId })
+                    headers: {...defaultHeaders, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password})
                 });
                 const data = await response.json();
                 token = data.token || '';
@@ -86,8 +86,6 @@
         }
 
         async function getItems() {
-            const userId = 4;
-
             try {
                 const response = await fetch(`${API_BASE}/inventory/list`, {
                     headers: { ...defaultHeaders, 'Authorization': `Bearer ${token}` }
@@ -98,7 +96,17 @@
                 document.getElementById('itemsResult').textContent = '错误: ' + error.message;
             }
         }
-
+        async function getMails() {
+            try {
+                const response = await fetch(`${API_BASE}/mail/list`, {
+                    headers: { ...defaultHeaders, 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                console.log(data,'data')
+            } catch (error) {
+            }
+        }
+        getMails()
         async function buyItem() {
             const itemId = document.getElementById('itemId').value;
 

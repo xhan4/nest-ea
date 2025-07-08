@@ -13,60 +13,67 @@ export class MailService {
     @InjectRepository(Mail)
     private mailRepo: Repository<Mail>,
     private notifyGateway: NotifyGateway
-  ) {}
-
+  ) { }
+  async getMailListById(userId: number, current: number = 1, pagesize: number = 10) {
+    const skip = (current - 1) * pagesize;
+    const [mails, total] = await this.mailRepo.findAndCount({
+      where: {
+        recipient: {id:userId}
+      },
+      relations: ['itemAttachment'],
+      skip,
+      take: pagesize
+    });
+    // 4. 平铺数据结构
+    const flatItems = mails.map(item => ({
+          id:item.id,
+          mailType:item.mailType,
+          attachmentType:item.attachmentType,
+          subject:item.subject,
+          content:item.content,
+          sentAt:item.sentAt,
+          quantity:item.quantity,
+          itemName:item.itemAttachment?.name,
+          gold:item.goldAttachment,
+          isRead:item.isRead,
+          isClaimed:item.isClaimed,
+    }));
+    console.log(mails,'mails')
+    return {
+      mails: flatItems,
+      total,
+    };
+  }
   async sendBuyerMail(buyer: User, item: Item, quantity: number, transactionId: number) {
     const mail = await this.mailRepo.save({
       recipient: buyer,
       mailType: MailType.PERSONAL,  // 明确指定邮件类型
       subject: '物品购买成功',
-      content: `您已成功购买 ${quantity} 个 ${item.name}，点击领取物品。`,
+      content:"",
+      quantity,
       attachmentType: MailAttachmentType.ITEM,
       itemAttachment: item,
       goldAttachment: null,
       sentAt: new Date(),
     });
     // 发送实时通知
-    this.notifyGateway.sendNotify(
-      buyer.id,
-      'new_mail',
-      {
-        mailId: mail.id,
-        subject: mail.subject,
-        content: mail.content,
-        sentAt: mail.sentAt,
-        transactionId,
-        attachmentType: mail.attachmentType  
-      }
-    );
-    
+    this.notifyGateway.sendNotify( buyer.id,'new_mail',{});
     return mail;
   }
 
   async sendSellerMail(seller: User, earnings: number, transactionId: number) {
     const mail = await this.mailRepo.save({
       recipient: seller,
-      subject: '物品出售成功',
-      content: `您的物品已成功出售，获得 ${earnings} 金币，点击领取。`,
+      subject: "物品出售成功",
+      content:"",
       attachmentType: MailAttachmentType.GOLD,
       itemAttachment: null,
       goldAttachment: earnings,
       sentAt: new Date(),
     });
-    
+
     // 发送实时通知
-    this.notifyGateway.sendNotify(
-      seller.id,
-      'new_mail',
-      {
-        mailId: mail.id,
-        subject: mail.subject,
-        content: mail.content,
-        sentAt: mail.sentAt,
-        transactionId,
-        attachmentType: mail.attachmentType  
-      }
-    );
+    this.notifyGateway.sendNotify(seller.id,'new_mail',{});
     return mail;
   }
 
@@ -112,8 +119,8 @@ export class MailService {
   }
 
   async sendSystemBroadcast(
-    subject: string, 
-    content: string, 
+    subject: string,
+    content: string,
     attachment?: { type: MailAttachmentType, data: any }
   ) {
     const mail = await this.mailRepo.save({
@@ -125,7 +132,7 @@ export class MailService {
       goldAttachment: attachment?.type === MailAttachmentType.GOLD ? attachment.data : null,
       sentAt: new Date()
     });
-  
+
     // 通过Socket.io广播给所有在线用户
     this.notifyGateway.server.emit('system_mail', {
       mailId: mail.id,
@@ -134,7 +141,7 @@ export class MailService {
       attachmentType: mail.attachmentType,
       sentAt: mail.sentAt
     });
-  
+
     return mail;
   }
 }
