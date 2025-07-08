@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { Item } from '../../entities/item.entity';
-import { Mail, MailAttachmentType, MailType } from '../../entities/mail.entity';
+import { Mail, MailType } from '../../entities/mail.entity';
 import { Inventory } from '../../entities/inventory.entity';
 import { NotifyGateway } from '../notify/notify.gateway';
 
@@ -18,7 +18,7 @@ export class MailService {
     const skip = (current - 1) * pagesize;
     const [mails, total] = await this.mailRepo.findAndCount({
       where: {
-        recipient: {id:userId}
+        recipient: { id: userId }
       },
       relations: ['itemAttachment'],
       skip,
@@ -26,19 +26,17 @@ export class MailService {
     });
     // 4. 平铺数据结构
     const flatItems = mails.map(item => ({
-          id:item.id,
-          mailType:item.mailType,
-          attachmentType:item.attachmentType,
-          subject:item.subject,
-          content:item.content,
-          sentAt:item.sentAt,
-          quantity:item.quantity,
-          itemName:item.itemAttachment?.name,
-          gold:item.goldAttachment,
-          isRead:item.isRead,
-          isClaimed:item.isClaimed,
+      id: item.id,
+      mailType: item.mailType,
+      subject: item.subject,
+      content: item.content,
+      sentAt: item.sentAt,
+      quantity: item.quantity,
+      itemName: item.itemAttachment?.name,
+      gold: item.goldAttachment,
+      isRead: item.isRead,
+      isClaimed: item.isClaimed,
     }));
-    console.log(mails,'mails')
     return {
       mails: flatItems,
       total,
@@ -47,33 +45,32 @@ export class MailService {
   async sendBuyerMail(buyer: User, item: Item, quantity: number, transactionId: number) {
     const mail = await this.mailRepo.save({
       recipient: buyer,
-      mailType: MailType.PERSONAL,  // 明确指定邮件类型
+      mailType: MailType.TRADE_ITEM,  // 明确指定邮件类型
       subject: '物品购买成功',
-      content:"",
+      content: "",
       quantity,
-      attachmentType: MailAttachmentType.ITEM,
       itemAttachment: item,
       goldAttachment: null,
       sentAt: new Date(),
     });
     // 发送实时通知
-    this.notifyGateway.sendNotify( buyer.id,'new_mail',{});
+    this.notifyGateway.sendNotify(buyer.id, 'new_mail', {});
     return mail;
   }
 
-  async sendSellerMail(seller: User, earnings: number, transactionId: number) {
+  async sendSellerMail(seller: User, earnings: number) {
     const mail = await this.mailRepo.save({
       recipient: seller,
+      mailType: MailType.TRADE_GOLD,
       subject: "物品出售成功",
-      content:"",
-      attachmentType: MailAttachmentType.GOLD,
+      content: "",
       itemAttachment: null,
       goldAttachment: earnings,
       sentAt: new Date(),
     });
 
     // 发送实时通知
-    this.notifyGateway.sendNotify(seller.id,'new_mail',{});
+    this.notifyGateway.sendNotify(seller.id, 'new_mail', {});
     return mail;
   }
 
@@ -88,7 +85,7 @@ export class MailService {
         throw new Error('无效的邮件或附件已领取');
       }
 
-      if (mail.attachmentType === MailAttachmentType.ITEM) {
+      if (mail.mailType === MailType.TRADE_ITEM) {
         const inventory = await manager.findOne(Inventory, {
           where: { user: { id: userId }, item: { id: mail.itemAttachment.id } },
         });
@@ -104,7 +101,7 @@ export class MailService {
             count: 1,
           });
         }
-      } else if (mail.attachmentType === MailAttachmentType.GOLD) {
+      } else if (mail.mailType === MailType.TRADE_GOLD) {
         await manager.update(User, userId, {
           balance: () => `balance + ${mail.goldAttachment}`,
         });
@@ -121,27 +118,17 @@ export class MailService {
   async sendSystemBroadcast(
     subject: string,
     content: string,
-    attachment?: { type: MailAttachmentType, data: any }
+    mailType: MailType,
   ) {
     const mail = await this.mailRepo.save({
-      mailType: MailType.SYSTEM,
+      mailType,
       subject,
       content,
-      attachmentType: attachment?.type,
-      itemAttachment: attachment?.type === MailAttachmentType.ITEM ? { id: attachment.data } : null,
-      goldAttachment: attachment?.type === MailAttachmentType.GOLD ? attachment.data : null,
+      itemAttachment: null,
+      goldAttachment: null,
       sentAt: new Date()
     });
-
-    // 通过Socket.io广播给所有在线用户
-    this.notifyGateway.server.emit('system_mail', {
-      mailId: mail.id,
-      subject: mail.subject,
-      content: mail.content,
-      attachmentType: mail.attachmentType,
-      sentAt: mail.sentAt
-    });
-
+    this.notifyGateway.server.emit('new_mail', {});
     return mail;
   }
 }

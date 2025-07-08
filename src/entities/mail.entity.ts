@@ -3,16 +3,11 @@ import { User } from './user.entity';
 import { Item } from './item.entity';
 
 export enum MailType {
-  SYSTEM = 'SYSTEM',  // 新增系统邮件类型
-  PERSONAL = 'PERSONAL'
+  SYSTEM_AWARD = 'SYSTEM_AWARD',  
+  SYTEM_NOTIFY= 'SYTEM_NOTIFY',
+  TRADE_ITEM = 'TRADE_ITEM',
+  TRADE_GOLD = 'TRADE_GOLD'
 }
-
-// 确保枚举被导出
-export enum MailAttachmentType {
-  ITEM = 'ITEM',
-  GOLD = 'GOLD'
-}
-
 @Entity("tb_mail")
 export class Mail {
   @PrimaryGeneratedColumn()
@@ -21,11 +16,8 @@ export class Mail {
   @ManyToOne(() => User, { nullable: true })
   recipient: User;
 
-  @Column({ type: 'enum', enum: MailType, default: MailType.PERSONAL })
+  @Column({ type: 'enum', enum: MailType, default: MailType.SYTEM_NOTIFY })
   mailType: MailType;
-
-  @Column({ type: 'enum', enum: MailAttachmentType, nullable: true })
-  attachmentType: MailAttachmentType;
 
   @Column()
   subject: string;

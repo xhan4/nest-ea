@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Req, Param, Body } from '@nestjs/common';
 import { MailService } from './mail.service';
-import { MailAttachmentType } from '../../entities/mail.entity'; // 添加这行导入
+import { MailType } from 'src/entities/mail.entity';
 
 @Controller('mail')
 export class MailController {
@@ -23,8 +23,8 @@ export class MailController {
   async sendSystemBroadcast(
     @Body('subject') subject: string,
     @Body('content') content: string,
-    @Body('attachment') attachment?: { type: MailAttachmentType, data: any }
+    @Body('mailType') mailType: MailType
   ) {
-    return this.mailService.sendSystemBroadcast(subject, content, attachment);
+    return this.mailService.sendSystemBroadcast(subject, content, mailType);
   }
 }
