@@ -7,14 +7,14 @@ export class TradeController {
 
   // 卖家上架物品
   @Post('listings')
-  async listItem(
+  async listings(
     @Body('itemId') itemId: number,
     @Body('count') count: number,
     @Body('price') price: number,
     @Req() req,
   ) {
     const sellerId = req.user.id;
-    return this.tradeService.listItem(sellerId, itemId, count, price);
+    return this.tradeService.listings(sellerId, itemId, count, price);
   }
 
   // 买家购买物品

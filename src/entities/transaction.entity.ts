@@ -18,7 +18,7 @@ export class Transaction {
   item: Item;
 
   @ManyToOne(() => Trade)
-  marketOrder: Trade;
+  trade: Trade;
 
   @Column()
   quantity: number;
@@ -34,4 +34,10 @@ export class Transaction {
 
   @Column({ type: 'timestamp' })
   transactionTime: Date;
+
+  @Column({ default: false })
+  buyerClaimed: boolean; 
+
+  @Column({ default: false })
+  sellerClaimed: boolean;
 }

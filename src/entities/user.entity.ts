@@ -1,16 +1,17 @@
-import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
+import {Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
 import * as crypto from "crypto";
-import encryption from "src/utils/crypto";
 import { Trade } from "./trade.entity";
 import { Inventory } from "./inventory.entity";
+import { Mail } from "./mail.entity";
+import { Transaction } from "./transaction.entity";
 
 @Entity("tb_user")
 export class User {
-  @PrimaryGeneratedColumn() // 标记为主列，值自动生成
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false }) // 添加 app_id 列
-  app_id: string; // 用于区分不同应用的用户
+  @Column({ nullable: false }) 
+  app_id: string; 
 
   @Column({ length: 30 })
   @Unique(['username'])
@@ -26,13 +27,13 @@ export class User {
   role: string;
 
 
-  @Column({ default: "用户" + generateRandomString(6) })
+  @Column({})
   nickname: string;
 
   @Column({ nullable: true })
   active: number
 
-  @Column({ nullable: true })
+  @Column()
   salt: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -44,24 +45,16 @@ export class User {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   balance: number;
 
-  @BeforeInsert()
-  beforeInsert() {
-    this.salt = crypto.randomBytes(4).toString("base64");
-    this.password = encryption(this.password, this.salt);
-  }
-
   @OneToMany(() => Trade, trade => trade.seller)
   sellTrades: Trade[];
 
-  @OneToMany(() => Trade, trade => trade.buyer)
+  @OneToMany(() => Transaction, transaction => transaction.buyer)
   buyTrades: Trade[];
 
   @OneToMany(() => Inventory, inventory => inventory.user)
   inventoryItems: Inventory[];
+
+  @OneToMany(() => Mail, mail => mail.recipient)
+  receivedMails: Mail[];
 }
 
-function generateRandomString(length: number): string {
-  return crypto.randomBytes(Math.ceil(length / 2))
-    .toString('hex')
-    .slice(0, length);
-}

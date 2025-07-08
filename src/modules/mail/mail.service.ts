@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { Item } from '../../entities/item.entity';
-import { Mail, MailAttachmentType } from '../../entities/mail.entity';
+import { Mail, MailAttachmentType, MailType } from '../../entities/mail.entity';
 import { Inventory } from '../../entities/inventory.entity';
 import { NotifyGateway } from '../notify/notify.gateway';
 
@@ -16,9 +16,9 @@ export class MailService {
   ) {}
 
   async sendBuyerMail(buyer: User, item: Item, quantity: number, transactionId: number) {
-    console.log('12323')
     const mail = await this.mailRepo.save({
       recipient: buyer,
+      mailType: MailType.PERSONAL,  // 明确指定邮件类型
       subject: '物品购买成功',
       content: `您已成功购买 ${quantity} 个 ${item.name}，点击领取物品。`,
       attachmentType: MailAttachmentType.ITEM,
@@ -26,7 +26,7 @@ export class MailService {
       goldAttachment: null,
       sentAt: new Date(),
     });
-        // 发送实时通知
+    // 发送实时通知
     this.notifyGateway.sendNotify(
       buyer.id,
       'new_mail',
@@ -35,9 +35,11 @@ export class MailService {
         subject: mail.subject,
         content: mail.content,
         sentAt: mail.sentAt,
-        transactionId
+        transactionId,
+        attachmentType: mail.attachmentType  
       }
     );
+    
     return mail;
   }
 
@@ -61,7 +63,8 @@ export class MailService {
         subject: mail.subject,
         content: mail.content,
         sentAt: mail.sentAt,
-        transactionId
+        transactionId,
+        attachmentType: mail.attachmentType  
       }
     );
     return mail;
@@ -70,7 +73,7 @@ export class MailService {
   async claimAttachment(mailId: number, userId: number) {
     return this.mailRepo.manager.transaction(async (manager) => {
       const mail = await manager.findOne(Mail, {
-        where: { id: mailId, recipient: { id: userId }, isAttachmentClaimed: false },
+        where: { id: mailId, recipient: { id: userId }, isClaimed: false },
         relations: ['recipient', 'itemAttachment'],
       });
 
@@ -101,10 +104,37 @@ export class MailService {
       }
 
       await manager.update(Mail, mailId, {
-        isAttachmentClaimed: true,
+        isClaimed: true,
       });
 
       return { success: true };
     });
+  }
+
+  async sendSystemBroadcast(
+    subject: string, 
+    content: string, 
+    attachment?: { type: MailAttachmentType, data: any }
+  ) {
+    const mail = await this.mailRepo.save({
+      mailType: MailType.SYSTEM,
+      subject,
+      content,
+      attachmentType: attachment?.type,
+      itemAttachment: attachment?.type === MailAttachmentType.ITEM ? { id: attachment.data } : null,
+      goldAttachment: attachment?.type === MailAttachmentType.GOLD ? attachment.data : null,
+      sentAt: new Date()
+    });
+  
+    // 通过Socket.io广播给所有在线用户
+    this.notifyGateway.server.emit('system_mail', {
+      mailId: mail.id,
+      subject: mail.subject,
+      content: mail.content,
+      attachmentType: mail.attachmentType,
+      sentAt: mail.sentAt
+    });
+  
+    return mail;
   }
 }

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+            box-sizing: border-box;
+        }
+    </style>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div>admin</div>
+        <div class="panel">
+            <button onclick="getItems()">获取</button>
+            <pre id="itemsResult"></pre>
+        </div>
+        <div class="panel">
+
+            <label>选择:
+                <select id="itemSelect"></select>
+            </label>
+            <label> <input type="number" id="listPrice"></label>
+            <button onclick="listItem()">shangjia</button>
+            <pre id="listResult"></pre>
+        </div>
+        <div class="panel">
+            <label>ID: <input type="text" id="itemId"></label>
+            <label>m: <input type="text" id="price"></label>
+            <button onclick="buyItem()">goumai</button>
+            <pre id="tradeResult"></pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3005'; // 根据你的API地址修改
+        const defaultHeaders = {
+            ['x-app-id']: 'WEB_CLIENT',
+        }
+        let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcF9pZCI6IldFQl9DTElFTlQiLCJpYXQiOjE3NTE5NTM0NzksImV4cCI6MTc1MjAzOTg3OX0.Xysd0ikvBvsSYLlJGoqzwSZV8HGj65kgi-kCJSECmpY';
+        // 上架商品
+        // 获取仓库物品
+        async function getInventory() {
+            try {
+                const response = await fetch(`${API_BASE}/inventory/list`, {
+                    headers: { ...defaultHeaders, 'Authorization': `Bearer ${token}` }
+                });
+                const {data} = await response.json();
+                // 填充物品选择下拉框
+                const select = document.getElementById('itemSelect');
+                select.innerHTML = data.items.map(item =>
+                    `<option value="${item.itemId}">${item.name} (ID: ${item.itemId})</option>`
+                ).join('');
+
+            } catch (error) {
+                console.error('获取仓库失败:', error);
+            }
+        }
+        getInventory()
+        async function listItem() {
+            const itemId = document.getElementById('itemSelect').value;
+            const price = document.getElementById('listPrice').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/trade/listings`, {
+                    method: 'POST',
+                    headers: {
+                        ...defaultHeaders,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        itemId,
+                        price,
+                        count:1
+                    })
+                });
+                const result = await response.json();
+                document.getElementById('listResult').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('listResult').textContent = '错误: ' + error.message;
+            }
+        }
+        async function getItems() {
+            const userId = 3;
+
+            try {
+                const response = await fetch(`${API_BASE}/inventory/list`, {
+                    headers: { ...defaultHeaders, 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                document.getElementById('itemsResult').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('itemsResult').textContent = '错误: ' + error.message;
+            }
+        }
+
+        async function buyItem() {
+            const itemId = document.getElementById('itemId').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/trade/buy`, {
+                    method: 'POST',
+                    headers: {
+                        ...defaultHeaders,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ itemId })
+                });
+                const data = await response.json();
+                document.getElementById('tradeResult').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('tradeResult').textContent = '错误: ' + error.message;
+            }
+        }
+        const socket = io('http://localhost:3005', {
+            path: '/ws',       // 匹配服务端路径
+            transports: ['websocket'], // 强制使用 WebSocket
+            autoConnect: true, extraHeaders: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        socket.on('connect', () => {
+            console.log('[WebSocket] ✅ 连接成功! ID:', socket.id);
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('[WebSocket] 🔴 连接失败:', error.message);
+            console.error('[WebSocket] 错误详情:', error);
+
+            // 尝试获取更多错误信息
+            if (error.type === 'TransportError') {
+                console.error('[WebSocket] 传输错误:', error.description);
+            } else if (error.type === 'UnauthorizedError') {
+                console.error('[WebSocket] 认证失败:', error.message);
+            }
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log('[WebSocket] 🟠 断开连接:', reason);
+
+            if (reason === 'io server disconnect') {
+                console.log('[WebSocket] 服务端主动断开');
+            } else if (reason === 'io client disconnect') {
+                console.log('[WebSocket] 客户端主动断开');
+            }
+        });
+
+        socket.on('reconnect_attempt', (attempt) => {
+            console.log(`[WebSocket] 🔄 重连尝试 (${attempt}/5)`);
+        });
+
+        socket.on('reconnect', (attempt) => {
+            console.log(`[WebSocket] ✅ 重连成功! 尝试次数: ${attempt}`);
+        });
+
+        socket.on('reconnect_error', (error) => {
+            console.error('[WebSocket] 🔴 重连失败:', error.message);
+        });
+
+        socket.on('reconnect_failed', () => {
+            console.error('[WebSocket] ❌ 重连完全失败，停止尝试');
+        });
+
+        // 监听所有事件（调试用）
+        socket.onAny((event, ...args) => {
+            console.log(`[WebSocket] 📤 收到事件: ${event}`, args);
+        });
+        function showNotification(message) {
+            // 创建通知弹窗
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.padding = '15px';
+            notification.style.background = '#4CAF50';
+            notification.style.color = 'white';
+            notification.style.borderRadius = '5px';
+            notification.style.zIndex = '1000';
+            notification.innerHTML = `
+      <h3>${message.title}</h3>
+      <p>${message.content}</p>
+    `;
+
+            document.body.appendChild(notification);
+
+            // 3秒后自动消失
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,5 +1,5 @@
-import { WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({ // 明确指定端口
   cors: {
@@ -9,6 +9,8 @@ import { Socket } from 'socket.io';
    transports: ['websocket'],
 })
 export class NotifyGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer()
+  server: Server;  // 添加这个属性
   private connectedClients = new Map<number, Socket>();
 
   handleConnection(client: Socket) {
@@ -29,6 +31,7 @@ export class NotifyGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   sendNotify(userId: number, event: string, data: any) {
     const client = this.connectedClients.get(userId);
+    console.log(client,userId,event,data)
     if (client) {
       client.emit(event, data);
     }

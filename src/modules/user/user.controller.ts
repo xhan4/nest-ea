@@ -13,7 +13,7 @@ export class UserController {
     @Post('register')
     create(@Body() createUserDto: CreateUserDto) {
 
-        return this.userService.create(createUserDto);
+        return this.userService.registe(createUserDto);
     }
     //登录用户
     @Public()
