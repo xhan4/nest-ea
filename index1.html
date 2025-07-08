@@ -77,7 +77,7 @@
                 const response = await fetch(`${API_BASE}/inventory/list`, {
                     headers: { ...defaultHeaders, 'Authorization': `Bearer ${token}` }
                 });
-                const {data} = await response.json();
+                const { data } = await response.json();
                 // 填充物品选择下拉框
                 const select = document.getElementById('itemSelect');
                 select.innerHTML = data.items.map(item =>
@@ -104,7 +104,7 @@
                     body: JSON.stringify({
                         itemId,
                         price,
-                        count:1
+                        count: 1
                     })
                 });
                 const result = await response.json();
@@ -149,8 +149,9 @@
         const socket = io('http://localhost:3005', {
             path: '/ws',       // 匹配服务端路径
             transports: ['websocket'], // 强制使用 WebSocket
-            autoConnect: true, extraHeaders: {
-                'Authorization': `Bearer ${token}`
+            autoConnect: true,
+            auth: {
+                token
             }
         });
         socket.on('connect', () => {

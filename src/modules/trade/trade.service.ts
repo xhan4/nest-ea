@@ -15,7 +15,7 @@ export class TradeService {
     @InjectRepository(Trade)
     private tradeRepo: Repository<Trade>,
     private mailService: MailService
-  ) {}
+  ) { }
 
   async listings(sellerId: number, itemId: number, quantity: number, perPrice: number) {
     return this.tradeRepo.manager.transaction(async (manager) => {
@@ -29,19 +29,22 @@ export class TradeService {
       if (!seller || !item || !inventory || inventory.count < quantity) {
         throw new HttpException('物品不存在或数量不足', HttpStatus.BAD_REQUEST);
       }
-
-      // 减少事务内的操作
-      await manager.update(Inventory, inventory.id, {
-        count: inventory.count - quantity,
-      });
-
+      const newCount = inventory.count - quantity;
+      // 如果物品数量变为0，则删除该物品记录
+      if (newCount <= 0) {
+        await manager.delete(Inventory, inventory.id);
+      } else {
+        await manager.update(Inventory, inventory.id, {
+          count: newCount,
+        });
+      }
       const trade = await manager.save(Trade, {
         seller,
         item,
         quantity,
         perPrice,
         status: TradeStatus.LISTED,
-        fee:0.05
+        fee: 0.05
       });
 
       return { success: true, tradeId: trade.id };
@@ -60,28 +63,28 @@ export class TradeService {
             relations: ['seller', 'item'],
           }),
         ]);
-  
+
         if (!buyer || !trade) {
           throw new HttpException('无效的购买请求', HttpStatus.BAD_REQUEST);
         }
-  
+
         if (quantity > trade.quantity) {
           throw new HttpException('购买数量超过可售数量', HttpStatus.BAD_REQUEST);
         }
-  
+
         const totalPrice = trade.perPrice * quantity;
         const feeRate = 0.05;
         const fee = totalPrice * feeRate;
         const sellerEarnings = totalPrice - fee;
-  
+
         if (buyer.balance < totalPrice) {
           throw new HttpException('金币不足', HttpStatus.BAD_REQUEST);
         }
-  
+
         await manager.update(User, buyerId, {
           balance: () => `balance - ${totalPrice}`,
         });
-  
+
         if (quantity === trade.quantity) {
           await manager.update(Trade, tradeId, {
             status: TradeStatus.SOLD,
@@ -93,7 +96,7 @@ export class TradeService {
             quantity: trade.quantity - quantity,
           });
         }
-  
+
         const transaction = await manager.save(Transaction, {
           buyer,
           seller: trade.seller,
@@ -105,7 +108,7 @@ export class TradeService {
           sellerEarnings,
           transactionTime: new Date(),
         });
-  
+
         return {
           buyer,
           tradeItem: trade.item,
@@ -115,7 +118,7 @@ export class TradeService {
           sellerEarnings
         };
       });
-  
+
       // 在事务外部发送邮件
       await this.mailService.sendBuyerMail(
         transactionResult.buyer,
@@ -128,7 +131,7 @@ export class TradeService {
         transactionResult.sellerEarnings,
         transactionResult.transactionId,
       );
-  
+
       return { success: true, transactionId: transactionResult.transactionId };
     } catch (error) {
       // 处理异常

@@ -122,8 +122,8 @@
             path: '/ws',       // 匹配服务端路径
             transports: ['websocket'], // 强制使用 WebSocket
             autoConnect: true,
-            extraHeaders: {
-                'Authorization': `Bearer ${token}`
+            auth: {
+              token
             }
         });
 
