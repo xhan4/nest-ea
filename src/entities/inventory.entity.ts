@@ -15,10 +15,4 @@ export class Inventory {
 
     @Column()
     count: number;
-
-    @Column({ default: false })
-    isTrading: boolean;
-
-    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    price: number;
 }
