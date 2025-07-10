@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {  Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Inventory } from '../../entities/inventory.entity';
@@ -17,7 +17,6 @@ export class InventoryService {
      const [inventoryItems, total] = await this.inventoryRepo.findAndCount({
       where: {
         user: { id: userId },
-        item: { isTrading: false }
       },
       relations: ['item'],
       skip,
@@ -30,9 +29,7 @@ export class InventoryService {
     count: item.count,      // 物品数量
     name: item.item.name,   // 物品名称
     type: item.item.type,   // 物品类型
-    isTrading: item.item.isTrading,  // 是否在交易中
     price: item.item.price, // 价格
-    lastTradeTime: item.item.lastTradeTime // 最后交易时间
   }));
     return {
     items: flatItems,
