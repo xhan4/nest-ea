@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, HttpStatus, HttpException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/rules.decorator';
 import { UserRole } from 'src/entities/user.entity';
@@ -19,6 +19,10 @@ export class RolesGuard implements CanActivate {
     }
 
     const { user } = context.switchToHttp().getRequest();
+    if (!requiredRoles.some(role => user?.roles?.includes(role))) {
+      throw new HttpException('无权访问：需要管理员权限', HttpStatus.FORBIDDEN);
+    }
+
     return requiredRoles.some(role => user?.roles?.includes(role));
   }
 }

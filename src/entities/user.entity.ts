@@ -25,19 +25,16 @@ export class User {
   @Column({ nullable: true })
   avatar: string;
 
-  @Column({
-    type: 'simple-array', default: UserRole.USER, 
-    transformer: {
-      to: (value: UserRole[]) => value.join(','),
-      from: (value: string) => value.split(',').map(v => v.trim())
-    }
-  })
   @Column({ 
     type: 'simple-array',
     nullable: false,
     transformer: {
-      to: (value: UserRole[]) => value.join(','),
-      from: (value: string) => value.split(',').map(v => v.trim())
+      to: (value: UserRole[]) => Array.isArray(value) ? value.join(',') : '0',
+      from: (value: unknown): UserRole[] => {
+        if (!value) return [UserRole.USER];
+        if (Array.isArray(value)) return value;
+        return String(value).split(',').map(v => v.trim() as UserRole);
+      }
     }
   })
   roles: UserRole[];
