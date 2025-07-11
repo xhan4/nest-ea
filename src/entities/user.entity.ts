@@ -1,17 +1,19 @@
-import {Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
-import * as crypto from "crypto";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { Trade } from "./trade.entity";
 import { Inventory } from "./inventory.entity";
 import { Mail } from "./mail.entity";
 import { Transaction } from "./transaction.entity";
-
+export enum UserRole {
+  USER = "0",
+  ADMIN = "1"
+}
 @Entity("tb_user")
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false }) 
-  appId: string; 
+  @Column({ nullable: false })
+  appId: string;
 
   @Column({ length: 30 })
   @Unique(['username'])
@@ -23,9 +25,22 @@ export class User {
   @Column({ nullable: true })
   avatar: string;
 
-  @Column({ default: "0" })
-  role: string;
-
+  @Column({
+    type: 'simple-array', default: UserRole.USER, 
+    transformer: {
+      to: (value: UserRole[]) => value.join(','),
+      from: (value: string) => value.split(',').map(v => v.trim())
+    }
+  })
+  @Column({ 
+    type: 'simple-array',
+    nullable: false,
+    transformer: {
+      to: (value: UserRole[]) => value.join(','),
+      from: (value: string) => value.split(',').map(v => v.trim())
+    }
+  })
+  roles: UserRole[];
 
   @Column({})
   nickname: string;

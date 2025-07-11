@@ -1,10 +1,11 @@
+import { UserRole } from "src/entities/user.entity";
 
 
 export class FindOneDto {
   userId: number;
   username: string;
   avatar: string;
-  role: string;
+  roles: UserRole[];
   nickname: string;
   active: number;
   create_time: Date;

@@ -3,7 +3,8 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshUserDto } from './dto/refresh-user.dto';
-import { Public } from '../public.decorator';
+import { Public } from 'src/core/decorators/public.decorator';
+import { Roles } from 'src/core/decorators/rules.decorator';
 
 @Controller('user')
 export class UserController {
@@ -45,6 +46,7 @@ export class UserController {
         return this.userService.findOne(id)
     }
     //查询用户列表
+    @Roles('1')
     @Get("/user_list")
     getAllUser() {
         return this.userService.findAll()

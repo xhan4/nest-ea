@@ -19,6 +19,7 @@ import { Trade } from './entities/trade.entity';
 import { NotifyModule } from './modules/notify/notify.module';
 import { Mail } from './entities/mail.entity';
 import { Transaction } from './entities/transaction.entity';
+import { RolesGuard } from './core/auth/roles.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -66,6 +67,11 @@ import { Transaction } from './entities/transaction.entity';
   providers: [AppService, {
     provide: APP_GUARD,
     useClass: AuthGuard,
-  }],
+  },
+   {
+      provide: APP_GUARD,
+      useClass: RolesGuard, 
+    }
+],
 })
 export class AppModule { }

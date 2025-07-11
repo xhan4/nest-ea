@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../../entities/user.entity';
+import { User, UserRole } from '../../entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -23,7 +23,7 @@ export class UserService {
       userId: user.id,
       username: user.username,
       avatar: user.avatar,
-      role: user.role,
+      roles: user.roles,
       nickname: user.nickname,
       active: user.active,
       create_time: user.create_time,
@@ -37,7 +37,7 @@ export class UserService {
         id: true,
         username: true,
         avatar: true,
-        role: true,
+        roles: true,
         nickname: true,
         active: true,
         create_time: true,
@@ -59,7 +59,8 @@ export class UserService {
         nickname: randomNickName(6),
         salt: salt,
         password: encryption(password, salt),
-        appId
+        appId,
+        roles: [UserRole.USER] // 设置默认角色
       });
       return '注册成功';
     } catch (error) {
@@ -84,7 +85,12 @@ export class UserService {
     if (user.appId !== appId) {
       throw new HttpException('无权访问该应用', HttpStatus.FORBIDDEN);
     }
-    const payload = { username: user.username, id: user.id, appId: user.appId };
+    const payload = { 
+      username: user.username, 
+      id: user.id, 
+      appId: user.appId,
+      roles: user.roles // 添加roles信息
+    };
     const token = this.jwtService.sign(payload, { expiresIn: this.configService.get("JWT_EXP") });
     const refreshToken = this.jwtService.sign({ id: user.id }, { expiresIn: this.configService.get("JWT_REFRESH_EXP") })
     return { token, refreshToken }
