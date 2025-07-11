@@ -4,10 +4,11 @@ import { User } from '../../entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import {encryption,creatSalt,randomNickName} from 'src/utils';
+import { encryption, creatSalt, randomNickName } from 'src/utils';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshUserDto } from './dto/refresh-user.dto';
 import { ConfigService } from '@nestjs/config';
+import { FindOneDto } from './dto/find-one.dto';
 @Injectable()
 export class UserService {
   constructor(
@@ -16,11 +17,34 @@ export class UserService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) { }
-  findOne(id: number): Promise<User> {
-    return this.userRepository.findOneBy({ id });
+  async findOne(id: number): Promise<FindOneDto> {
+    const user = await this.userRepository.findOneBy({ id });
+    return {
+      userId: user.id,
+      username: user.username,
+      avatar: user.avatar,
+      role: user.role,
+      nickname: user.nickname,
+      active: user.active,
+      create_time: user.create_time,
+      update_time: user.update_time,
+      balance: user.balance,
+    }
   }
   findAll(): Promise<User[]> {
-    return this.userRepository.find()
+    return this.userRepository.find({
+      select: {
+        id: true,
+        username: true,
+        avatar: true,
+        role: true,
+        nickname: true,
+        active: true,
+        create_time: true,
+        update_time: true,
+        balance: true,
+      }
+    })
   }
   async registe(createUserDto: CreateUserDto) {
     const { username, password, appId } = createUserDto;
@@ -31,10 +55,10 @@ export class UserService {
     try {
       const salt = creatSalt()
       await this.userRepository.save({
-        username, 
-        nickname:randomNickName(6),
-        salt:salt,
-        password: encryption(password,salt),
+        username,
+        nickname: randomNickName(6),
+        salt: salt,
+        password: encryption(password, salt),
         appId
       });
       return '注册成功';
