@@ -5,6 +5,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshUserDto } from './dto/refresh-user.dto';
 import { Public } from 'src/core/decorators/public.decorator';
 import { Roles } from 'src/core/decorators/rules.decorator';
+import { RoleEnum } from 'src/core/enums/roles.enum';
 
 @Controller('user')
 export class UserController {
@@ -34,22 +35,22 @@ export class UserController {
     }
 
     //查询用户详细信息
-    @Get("/getUserInfo")
+    @Get("getUserInfo")
     getUserInfo(@Req() req) {
         const userId = req.user.userId; 
         return this.userService.findOne(userId);
     }
 
-    //根据id查询用户信息
-    @Get("/:id")
-    getUser(@Param('id', ParseIntPipe) id: number) {
-        return this.userService.findOne(id)
-    }
-    //查询用户列表
-    @Roles('1')
-    @Get("/user_list")
+   //查询用户列表
+    @Roles(RoleEnum.ADMIN)
+    @Get("user_list")
     getAllUser() {
         return this.userService.findAll()
     }
 
+    //根据id查询用户信息
+    @Get(":id")
+    getUser(@Param('id', ParseIntPipe) id: number) {
+        return this.userService.findOne(id)
+    }
 }

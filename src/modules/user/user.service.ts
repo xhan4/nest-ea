@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User, UserRole } from '../../entities/user.entity';
+import { User} from '../../entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RefreshUserDto } from './dto/refresh-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { FindOneDto } from './dto/find-one.dto';
+import { RoleEnum } from 'src/core/enums/roles.enum';
 @Injectable()
 export class UserService {
   constructor(
@@ -60,7 +61,7 @@ export class UserService {
         salt: salt,
         password: encryption(password, salt),
         appId,
-        roles: [UserRole.USER] // 设置默认角色
+        roles: [RoleEnum.USER] // 设置默认角色
       });
       return '注册成功';
     } catch (error) {

@@ -3,10 +3,7 @@ import { Trade } from "./trade.entity";
 import { Inventory } from "./inventory.entity";
 import { Mail } from "./mail.entity";
 import { Transaction } from "./transaction.entity";
-export enum UserRole {
-  USER = "0",
-  ADMIN = "1"
-}
+import { RoleEnum } from "src/core/enums/roles.enum";
 @Entity("tb_user")
 export class User {
   @PrimaryGeneratedColumn()
@@ -29,15 +26,15 @@ export class User {
     type: 'simple-array',
     nullable: false,
     transformer: {
-      to: (value: UserRole[]) => Array.isArray(value) ? value.join(',') : '0',
-      from: (value: unknown): UserRole[] => {
-        if (!value) return [UserRole.USER];
+      to: (value: RoleEnum[]) => Array.isArray(value) ? value.join(',') : '0',
+      from: (value: unknown): RoleEnum[] => {
+        if (!value) return [RoleEnum.USER];
         if (Array.isArray(value)) return value;
-        return String(value).split(',').map(v => v.trim() as UserRole);
+        return String(value).split(',').map(v => v.trim() as RoleEnum);
       }
     }
   })
-  roles: UserRole[];
+  roles: RoleEnum[];
 
   @Column({})
   nickname: string;
