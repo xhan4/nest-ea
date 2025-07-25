@@ -1,9 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { Trade } from "./trade.entity";
 import { Inventory } from "./inventory.entity";
 import { Mail } from "./mail.entity";
 import { Transaction } from "./transaction.entity";
 import { RoleEnum } from "src/core/enums/roles.enum";
+import { Character } from "./character.entity";
+
 @Entity("tb_user")
 export class User {
   @PrimaryGeneratedColumn()
@@ -65,5 +67,8 @@ export class User {
 
   @OneToMany(() => Mail, mail => mail.recipient)
   receivedMails: Mail[];
+
+  @OneToOne(() => Character, character => character.user)
+  character: Character;
 }
 

@@ -1,0 +1,23 @@
+@BASE_URL = http://localhost:3005
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwicm9sZXMiOlsiMSJdLCJpYXQiOjE3NTM0MTM1OTksImV4cCI6MTc1MzQ5OTk5OX0.cwGPDbat9S0xGChS4-JkWoPwYyRxhQoRu9yZw5Np8W4
+### 登录
+POST {{BASE_URL}}/user/login
+Content-Type: application/json
+x-app-id: WEB_ADMIN
+
+{
+    "username": "admin",
+    "password": "123456"
+}
+
+###
+GET  {{BASE_URL}}/user/user_list
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+###
+GET  {{BASE_URL}}/user/4
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
