@@ -30,7 +30,6 @@ export class ItemService {
   async getItemById(itemId: number) {
     return this.itemRepo.findOne({ 
       where: { id: itemId },
-      relations: ['owner']
     });
   }
 }

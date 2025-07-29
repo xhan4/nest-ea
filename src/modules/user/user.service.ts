@@ -19,7 +19,10 @@ export class UserService {
     private configService: ConfigService,
   ) { }
   async findOne(id: number): Promise<FindOneDto> {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['character']
+    });
     return {
       userId: user.id,
       username: user.username,
@@ -29,7 +32,7 @@ export class UserService {
       active: user.active,
       create_time: user.create_time,
       update_time: user.update_time,
-      balance: user.balance,
+      character: user.character?.id??null,
     }
   }
   findAll(): Promise<User[]> {
@@ -43,7 +46,6 @@ export class UserService {
         active: true,
         create_time: true,
         update_time: true,
-        balance: true,
       }
     })
   }
@@ -74,7 +76,8 @@ export class UserService {
       where: [
         { username: username },
         { nickname: username }
-      ]
+      ],
+       relations: ['character']
     });
 
     if (!user) {
@@ -92,9 +95,20 @@ export class UserService {
       appId: user.appId,
       roles: user.roles // 添加roles信息
     };
+    const userInfo = {
+      userId: user.id,
+      username: user.username,
+      avatar: user.avatar,
+      roles: user.roles,
+      nickname: user.nickname,
+      active: user.active,
+      create_time: user.create_time,
+      update_time: user.update_time,
+      character: user.character?.id??null,
+    }
     const token = this.jwtService.sign(payload, { expiresIn: this.configService.get("JWT_EXP") });
     const refreshToken = this.jwtService.sign({ id: user.id }, { expiresIn: this.configService.get("JWT_REFRESH_EXP") })
-    return { token, refreshToken }
+    return { token, refreshToken,userInfo}
   }
 
   // 刷新token

@@ -2,23 +2,12 @@ import { Entity, Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Item } from './item.entity';
 import { Trade } from './trade.entity';
+import { Character } from './character.entity';
 
 @Entity("tb_transaction")
 export class Transaction {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @ManyToOne(() => User)
-  buyer: User;
-
-  @ManyToOne(() => User)
-  seller: User;
-
-  @ManyToOne(() => Item)
-  item: Item;
-
-  @ManyToOne(() => Trade)
-  trade: Trade;
 
   @Column()
   quantity: number;
@@ -40,4 +29,16 @@ export class Transaction {
 
   @Column({ default: false })
   sellerClaimed: boolean;
+
+  @ManyToOne(() => Character)
+  buyer: Character;
+
+  @ManyToOne(() => Character)
+  seller: Character;
+
+  @ManyToOne(() => Item)
+  item: Item;
+
+  @ManyToOne(() => Trade)
+  trade: Trade;
 }

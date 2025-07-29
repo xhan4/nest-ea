@@ -38,21 +38,21 @@ export class NotifyGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
   handleConnection(client: Socket) {
-    const userId = client.data.id;
-    if (userId) {
-      this.connectedClients.set(Number(userId), client);
+    const characterId = client.data.id;
+    if (characterId) {
+      this.connectedClients.set(Number(characterId), client);
     }
   }
 
   handleDisconnect(client: Socket) {
-    const userId = client.data.id;
-    if (userId) {
-      this.connectedClients.delete(Number(userId));
+    const characterId = client.data.id;
+    if (characterId) {
+      this.connectedClients.delete(Number(characterId));
     }
   }
 
-  sendNotify(userId: number, event: string, data: any) {
-    const client = this.connectedClients.get(userId);
+  sendNotify(characterId: number, event: string, data: any) {
+    const client = this.connectedClients.get(characterId);
     if (client) {
       client.emit(event, data);
     }

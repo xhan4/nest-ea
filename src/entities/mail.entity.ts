@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from './user.entity';
 import { Item } from './item.entity';
+import { Character } from './character.entity';
 
 export enum MailType {
   SYSTEM_AWARD = 'SYSTEM_AWARD',  
@@ -17,9 +17,6 @@ export class Mail {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, { nullable: true })
-  recipient: User;
-
   @Column({ type: 'enum', enum: MailType, default: MailType.SYTEM_NOTIFY })
   mailType: MailType;
 
@@ -32,9 +29,6 @@ export class Mail {
   @Column()
   quantity: number;
    
-  @ManyToOne(() => Item, { nullable: true })
-  itemAttachment: Item;
-
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   goldAttachment: number;
 
@@ -53,4 +47,10 @@ export class Mail {
 
   @Column({ type: 'timestamp' })
   sentAt: Date;
+
+  @ManyToOne(() => Character, { nullable: true })
+  recipient: Character;
+
+  @ManyToOne(() => Item, { nullable: true })
+  itemAttachment: Item;
 }

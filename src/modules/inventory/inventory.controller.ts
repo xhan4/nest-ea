@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Req } from "@nestjs/common";
 import { InventoryService } from "./inventory.service";
 import { AddItemDto } from "./dto/add-item.dto";
+import { RemoveItemDto } from "./dto/remove-item.dto";
 
 @Controller('inventory')
 
@@ -8,9 +9,9 @@ export class InventoryController {
   constructor(private readonly service: InventoryService) {}
 
   @Get('/list')
-  async getItemsByUser(@Req() req:any) {
-   const {current,pagesize} = req.query
-    return this.service.getUserItems(req.user.id,current,pagesize);
+  async getItemsByCharacter(@Req() req:any) {
+   const {current,pagesize,characterId} = req.query
+    return this.service.getCharacterItems(characterId,current,pagesize);
   }
 
   @Get('/detail/:itemId')
@@ -20,9 +21,13 @@ export class InventoryController {
 
   @Post('/addItem')
   async addItem(@Body() addItemDto: AddItemDto, @Req() req:any) {
-    const { itemId, count } = addItemDto;
-    const userId = req.user.id
-    return this.service.addItemToInventory(userId, itemId, count);
+    const { itemId, count,characterId} = addItemDto;
+    return this.service.addItemToInventory(characterId, itemId, count);
   }
 
+  @Post('/removeItem')
+  async removeItem(@Body() removeItemDto: RemoveItemDto) {
+    const { characterId,itemId,count} = removeItemDto;
+    return this.service.removeItemFromInventory(characterId, itemId,count);
+  }
 }

@@ -8,15 +8,15 @@ export class MailController {
 
   @Get('list')
   async getInbox(@Req() req) {
-    const userId = req.user.id;
+    const {characterId} = req.query;
     // 实现获取用户邮件列表逻辑
-    return this.mailService.getMailListById(userId);
+    return this.mailService.getMailListById(characterId);
   }
 
   @Post('claim/:mailId')
   async claimAttachment(@Param('mailId') mailId: number, @Req() req) {
-    const userId = req.user.id;
-    return this.mailService.claimAttachment(mailId, userId);
+    const {characterId} = req.query;
+    return this.mailService.claimAttachment(mailId, characterId);
   }
 
   @Post('reward')
@@ -24,13 +24,13 @@ export class MailController {
     @Body('mailType') mailType:MailType,
     @Body('subject') subject:string,
     @Body('content') content:string,
-    @Body('userIds') userIds: number[],
+    @Body('characterIds') characterIds: number[],
     @Body('rewards') rewards: Array<{
       type: REWARDTYPE;
       itemId?: number;
       amount: number;
     }>
   ) {
-    return this.mailService.sendBatchRewards(mailType,subject,content,userIds,rewards);
+    return this.mailService.sendBatchRewards(mailType,subject,content,characterIds,rewards);
   }
 }

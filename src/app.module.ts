@@ -20,6 +20,12 @@ import { NotifyModule } from './modules/notify/notify.module';
 import { Mail } from './entities/mail.entity';
 import { Transaction } from './entities/transaction.entity';
 import { RolesGuard } from './core/auth/roles.guard';
+import { Character } from './entities/character.entity';
+import { SectMember } from './entities/sect-member.entity';
+import { Sect } from './entities/sect.entity';
+import { SpiritualField } from './entities/spiritual-field.entity';
+import { CharacterModule } from './modules/character/character.module';
+import { SectModule } from './modules/sect/sect.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -31,7 +37,7 @@ import { RolesGuard } from './core/auth/roles.guard';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'mysql', // 数据库类型
-        entities: [User, Inventory, Item, Mail, Trade, Transaction], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
+        entities: [User, Inventory, Item, Mail, Trade, Transaction,Character,Sect,SectMember,SpiritualField], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
         host: configService.get('DB_HOST'), // 主机，默认为localhost
         port: configService.get<number>('DB_PORT'), // 端口号
         username: configService.get('DB_USER'), // 用户名
@@ -61,7 +67,9 @@ import { RolesGuard } from './core/auth/roles.guard';
     ItemModule,
     MailModule,
     TradeModule,
-    NotifyModule
+    NotifyModule,
+    CharacterModule,
+    SectModule
   ],
   controllers: [AppController],
   providers: [AppService, {

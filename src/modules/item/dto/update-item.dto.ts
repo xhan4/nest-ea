@@ -15,4 +15,6 @@ export class UpdateItemDto {
   @IsPositive()
   @IsOptional()
   rarity?: number;
+
+  update_time: Date;
 }

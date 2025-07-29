@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.entity";
 import { Item } from "./item.entity";
+import { Character } from "./character.entity";
 export enum TradeStatus {
   LISTED = "LISTED", // 已上架
   PARTIALLY_SOLD = "PARTIALLY_SOLD", // 部分售出
@@ -12,9 +13,6 @@ export enum TradeStatus {
 export class Trade {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @ManyToOne(() => User)
-  seller: User; 
 
   @ManyToOne(() => Item)
   item: Item; 
@@ -33,4 +31,7 @@ export class Trade {
 
   @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
   fee: number; 
+
+  @ManyToOne(() => Character)
+  seller: Character; 
 }

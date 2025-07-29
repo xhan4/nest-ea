@@ -6,8 +6,8 @@ export class Village {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Sect, sect => sect.villages)
-  sect: Sect;
+  // @ManyToOne(() => Sect, sect => sect.villages)
+  // sect: Sect;
 
   @Column({ length: 100 })
   name: string;

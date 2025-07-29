@@ -15,4 +15,13 @@ export class Item {
 
     @Column()
     desc: string;
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    create_time: Date;
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    update_time: Date;
+
+    @Column()
+    create_by: number;
 }

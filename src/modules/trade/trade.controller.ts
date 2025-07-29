@@ -11,9 +11,8 @@ export class TradeController {
     @Body('itemId') itemId: number,
     @Body('count') count: number,
     @Body('price') price: number,
-    @Req() req,
+    @Body('characterId') sellerId: number,
   ) {
-    const sellerId = req.user.id;
     return this.tradeService.listings(sellerId, itemId, count, price);
   }
 
@@ -22,22 +21,21 @@ export class TradeController {
   async buyItem(
     @Param('tradeId') tradeId: number,
     @Body('count') count: number, // 新增参数，用于指定购买数量
-    @Req() req
+    @Body('characterId') buyerId: number,
   ) {
-    const buyerId = req.user.id;
     // 如果未传入 count，默认购买全部
     return this.tradeService.buyItem(buyerId, tradeId, count);
   }
 
   // 买家领取物品
   @Post('claim/item/:tradeId')
-  async claimItem(@Param('tradeId') tradeId: number, @Req() req) {
-    return this.tradeService.claimItem(tradeId, req.user.id);
+  async claimItem(@Param('tradeId') tradeId: number,  @Body('characterId') characterId: number) {
+    return this.tradeService.claimItem(tradeId, characterId);
   }
 
   // 卖家领取金币
   @Post('claim/funds/:tradeId') 
-  async claimFunds(@Param('tradeId') tradeId: number, @Req() req) {
-    return this.tradeService.claimFunds(tradeId, req.user.id);
+  async claimFunds(@Param('tradeId') tradeId: number,@Body('characterId') characterId: number,) {
+    return this.tradeService.claimFunds(tradeId,characterId);
   }
 }

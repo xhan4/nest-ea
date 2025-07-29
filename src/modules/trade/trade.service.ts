@@ -8,6 +8,7 @@ import { Inventory } from "src/entities/inventory.entity";
 
 import { MailService } from "../mail/mail.service";
 import { Transaction } from "src/entities/transaction.entity";
+import { Character } from "src/entities/character.entity";
 
 @Injectable()
 export class TradeService {
@@ -21,23 +22,19 @@ export class TradeService {
     return this.tradeRepo.manager.transaction(async (manager) => {
       // 使用更高效的查询方式，例如使用缓存或批量查询
       const [seller, item, inventory] = await Promise.all([
-        manager.findOne(User, { where: { id: sellerId } }),
+        manager.findOne(Character, { where: { id: sellerId } }),
         manager.findOne(Item, { where: { id: itemId } }),
-        manager.findOne(Inventory, { where: { user: { id: sellerId }, item: { id: itemId } } }),
+        manager.findOne(Inventory, { where: { character: { id: sellerId }, item: { id: itemId } } }),
       ]);
 
       if (!seller || !item || !inventory || inventory.count < quantity) {
         throw new HttpException('物品不存在或数量不足', HttpStatus.BAD_REQUEST);
       }
       const newCount = inventory.count - quantity;
-      // 如果物品数量变为0，则删除该物品记录
-      if (newCount <= 0) {
-        await manager.delete(Inventory, inventory.id);
-      } else {
-        await manager.update(Inventory, inventory.id, {
+      //更新数量
+      await manager.update(Inventory, inventory.id, {
           count: newCount,
         });
-      }
       const trade = await manager.save(Trade, {
         seller,
         item,
@@ -57,7 +54,7 @@ export class TradeService {
     try {
       transactionResult = await this.tradeRepo.manager.transaction(async (manager) => {
         const [buyer, trade] = await Promise.all([
-          manager.findOne(User, { where: { id: buyerId } }),
+          manager.findOne(Character, { where: { id: buyerId } }),
           manager.findOne(Trade, {
             where: { id: tradeId, status: TradeStatus.LISTED },
             relations: ['seller', 'item'],
@@ -81,7 +78,7 @@ export class TradeService {
           throw new HttpException('金币不足', HttpStatus.BAD_REQUEST);
         }
 
-        await manager.update(User, buyerId, {
+        await manager.update(Character, buyerId, {
           balance: () => `balance - ${totalPrice}`,
         });
 
@@ -137,10 +134,10 @@ export class TradeService {
     }
   }
 
-  async claimItem(tradeId: number, userId: number) {
+  async claimItem(tradeId: number, characterId: number) {
     return this.tradeRepo.manager.transaction(async (manager) => {
       const trade = await manager.findOne(Transaction, {
-        where: { id: tradeId, buyer: { id: userId }, buyerClaimed: false },
+        where: { id: tradeId, buyer: { id: characterId }, buyerClaimed: false },
         relations: ['item'],
       });
 
@@ -149,7 +146,7 @@ export class TradeService {
       }
 
       const buyerInventory = await manager.findOne(Inventory, {
-        where: { user: { id: userId }, item: { id: trade.item.id } },
+        where: { character: { id: characterId }, item: { id: trade.item.id } },
       });
 
       if (buyerInventory) {
@@ -158,7 +155,7 @@ export class TradeService {
         });
       } else {
         await manager.save(Inventory, {
-          user: { id: userId },
+          user: { id: characterId },
           item: { id: trade.item.id },
           count: trade.quantity,
         });
@@ -170,17 +167,17 @@ export class TradeService {
     });
   }
 
-  async claimFunds(tradeId: number, userId: number) {
+  async claimFunds(tradeId: number, characterId: number) {
     return this.tradeRepo.manager.transaction(async (manager) => {
       const trade = await manager.findOne(Transaction, {
-        where: { id: tradeId, seller: { id: userId }, sellerClaimed: false },
+        where: { id: tradeId, seller: { id: characterId }, sellerClaimed: false },
       });
 
       if (!trade) {
         throw new HttpException('无效的交易或已领取金币', HttpStatus.BAD_REQUEST);
       }
 
-      await manager.update(User, userId, {
+      await manager.update(Character, characterId, {
         balance: () => `balance + ${trade.sellerEarnings}`,
       });
 

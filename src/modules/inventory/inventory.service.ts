@@ -1,6 +1,6 @@
 import {  Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { Inventory } from '../../entities/inventory.entity';
 import { Item } from '../../entities/item.entity';
 
@@ -12,11 +12,12 @@ export class InventoryService {
     @InjectRepository(Item)
     private itemRepo: Repository<Item> // 添加 ItemRepository
   ) { }
-  async getUserItems(userId: number, current: number = 1,pagesize: number = 10) {
+  async getCharacterItems(characterId: number, current: number = 1,pagesize: number = 10) {
     const skip = (current - 1) * pagesize;
      const [inventoryItems, total] = await this.inventoryRepo.findAndCount({
       where: {
-        user: { id: userId },
+        character: { id: characterId },
+        count: MoreThan(0) // 只查询数量大于0的物品
       },
       relations: ['item'],
       skip,
@@ -44,12 +45,12 @@ export class InventoryService {
     });
   }
 
-  async addItemToInventory(userId: number, itemId: number, count: number) {
+  async addItemToInventory(characterId: number, itemId: number, count: number) {
     return this.inventoryRepo.manager.transaction(async (manager) => {
       // 查找是否已有该物品
       const existingItem = await manager.findOne(Inventory, {
         where: {
-          user: { id: userId },
+          character: { id: characterId },
           item: { id: itemId }
         }
       });
@@ -62,11 +63,29 @@ export class InventoryService {
       } else {
         // 否则创建新记录
         const newItem = manager.create(Inventory, {
-          user: { id: userId },
+          character: { id: characterId },
           item: { id: itemId },
           count
         });
         return manager.save(newItem);
+      }
+    });
+  }
+
+  async removeItemFromInventory(characterId: number, itemId: number, count: number) {
+    return this.inventoryRepo.manager.transaction(async (manager) => {
+      // 查找物品
+      const existingItem = await manager.findOne(Inventory, {
+        where: {
+          character: { id: characterId },
+          item: { id: itemId }
+        }
+      });
+      if (existingItem) {
+        // 如果已有则减少数量
+        return manager.update(Inventory, existingItem.id, {
+          count: existingItem.count - count
+        });
       }
     });
   }

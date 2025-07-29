@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { Sect } from "./sect.entity";
 import { Character } from "./character.entity";
+import { GenderEnum } from "src/core/enums/gender.enum";
 
 @Entity("tb_sect_member")
 @Unique(['sect', 'character'])
@@ -14,7 +15,7 @@ export class SectMember {
   @ManyToOne(() => Character, character => character.sectMembers)
   character: Character;
 
-  @Column({ 
+  @Column({
     type: 'enum',
     enum: ['LEADER', 'ELDER', 'DISCIPLE', 'INNER', 'OUTER'],
     default: 'DISCIPLE'
@@ -24,6 +25,32 @@ export class SectMember {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   joined_at: Date;
 
-  @Column({ default: 0 })
-  contribution: number;
+  @Column({ default: 60 })
+  maxLifespan: number;
+
+  @Column({ default: 18 })
+  age: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastAgingTime: Date;
+
+  @Column({
+    type: 'enum',
+    enum: GenderEnum,
+    default: GenderEnum.MALE
+  })
+  gender: GenderEnum;
+
+  @Column({
+    type: 'int',
+    default: 50,
+    comment: '范围1-100'
+  })
+  comprehension: number;
+
+  @Column({
+    type: 'json',
+    nullable: true,
+  })
+  spiritRoots: string[];
 }

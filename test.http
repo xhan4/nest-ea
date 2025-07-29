@@ -1,5 +1,5 @@
 @BASE_URL = http://localhost:3005
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwicm9sZXMiOlsiMSJdLCJpYXQiOjE3NTM0MTM1OTksImV4cCI6MTc1MzQ5OTk5OX0.cwGPDbat9S0xGChS4-JkWoPwYyRxhQoRu9yZw5Np8W4
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwicm9sZXMiOlsiMSJdLCJpYXQiOjE3NTM2NzIwMzIsImV4cCI6MTc1Mzc1ODQzMn0.Or47B1ogu7fP97pxvuhnECZ24wqB0T35-h0bTuPweP0
 ### 登录
 POST {{BASE_URL}}/user/login
 Content-Type: application/json
@@ -17,7 +17,32 @@ Authorization: Bearer {{token}}
 x-app-id: WEB_ADMIN
 
 ###
-GET  {{BASE_URL}}/user/4
+GET  {{BASE_URL}}/user/3
 Content-Type: application/json
 Authorization: Bearer {{token}}
 x-app-id: WEB_ADMIN
+
+###
+GET  {{BASE_URL}}/api/time
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+###
+POST {{BASE_URL}}/character/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+{
+    "name": "张三",
+    "gender": "MALE",
+    "comprehension": 50,
+    "spiritRoots": ["METAL", "WOOD"],
+    "maxLifespan": 60,
+    "age": 18,
+    "strength": 10,
+    "agility": 10,
+    "intelligence": 10,
+    "vitality": 10
+}

@@ -1,8 +1,4 @@
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
-import { Trade } from "./trade.entity";
-import { Inventory } from "./inventory.entity";
-import { Mail } from "./mail.entity";
-import { Transaction } from "./transaction.entity";
 import { RoleEnum } from "src/core/enums/roles.enum";
 import { Character } from "./character.entity";
 
@@ -52,21 +48,6 @@ export class User {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   update_time: Date;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  balance: number;
-
-  @OneToMany(() => Trade, trade => trade.seller)
-  sellTrades: Trade[];
-
-  @OneToMany(() => Transaction, transaction => transaction.buyer)
-  buyTrades: Trade[];
-
-  @OneToMany(() => Inventory, inventory => inventory.user)
-  inventoryItems: Inventory[];
-
-  @OneToMany(() => Mail, mail => mail.recipient)
-  receivedMails: Mail[];
 
   @OneToOne(() => Character, character => character.user)
   character: Character;
