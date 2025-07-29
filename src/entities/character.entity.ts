@@ -74,7 +74,7 @@ export class Character {
   user: User;
 
   @OneToOne(() => Sect, sect => sect.founder)
-  foundedSect: Sect;
+  sect: Sect;
   
   @OneToMany(() => Trade, trade => trade.seller)
   sellTrades: Trade[];
@@ -88,6 +88,6 @@ export class Character {
   @OneToMany(() => SectMember, member => member.character)
   sectMembers: SectMember[];
 
-  @OneToOne(() => Inventory, inventory => inventory.character)
-  inventory: Inventory;
+  @OneToMany(() => Inventory, inventory => inventory.character)
+  inventories: Inventory[];
 }

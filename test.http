@@ -1,5 +1,5 @@
 @BASE_URL = http://localhost:3005
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwicm9sZXMiOlsiMSJdLCJpYXQiOjE3NTM2NzIwMzIsImV4cCI6MTc1Mzc1ODQzMn0.Or47B1ogu7fP97pxvuhnECZ24wqB0T35-h0bTuPweP0
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwicm9sZXMiOlsiMSJdLCJpYXQiOjE3NTM3Njc5MTIsImV4cCI6MTc1Mzg1NDMxMn0.mkK9mwu0kCqpSMqbTOZ2E_LFVkdCkY2BqUP0hQN8Dc8
 ### 登录
 POST {{BASE_URL}}/user/login
 Content-Type: application/json
@@ -45,4 +45,48 @@ x-app-id: WEB_ADMIN
     "agility": 10,
     "intelligence": 10,
     "vitality": 10
+}
+
+###
+POST {{BASE_URL}}/sect/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+{
+    "name": "qingyunzong",
+    "description": "sect1 description",
+    "founderId": 1
+}
+###
+POST {{BASE_URL}}/sect/update/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+{
+    "name": "qingyunzong",
+    "description": "sect2 description"
+}
+
+###
+GET {{BASE_URL}}/sect/members?sectId=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+###
+GET {{BASE_URL}}/sect/pendings?sectId=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+###
+POST {{BASE_URL}}/sect/process/41
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+{
+    "accept": false
 }

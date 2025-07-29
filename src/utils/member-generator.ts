@@ -18,25 +18,27 @@ const PURITY_VALUES = {
 
 // 修改返回类型定义
 interface SpiritRootResult {
-  roots: string[];
+  name:string
+  spiritRoots: string[];
   purities: Record<string, number>;
   gender: GenderEnum;
   comprehension: number;     
 }
 
-export function generateSpiritRoot(): SpiritRootResult {
+export function generateMember(): SpiritRootResult {
   // 随机性别 (50%概率)
   const gender = Math.random() < 0.5 ? GenderEnum.MALE : GenderEnum.FEMALE;
   
-  // 基础悟性 (1-100)
+  // 基础(1-100)
   let comprehension = Math.floor(Math.random() * 100) + 1;
 
   if (Math.random() < 0.02) {
     const type = ROOT_TYPES.VARIANT[Math.floor(Math.random() * ROOT_TYPES.VARIANT.length)];
-    // 异灵根保底悟性60
+    // 保底60
     comprehension = Math.max(comprehension, 60);
     return {
-      roots: [type],
+      name:generateName(gender),
+      spiritRoots: [type],
       purities: { [type]: PURITY_VALUES.VARIANT[0] },
       gender,
       comprehension
@@ -76,10 +78,13 @@ export function generateSpiritRoot(): SpiritRootResult {
   // 单灵根保底悟性50
   if (rootCount === 1) {
     comprehension = Math.max(comprehension, 50);
+  }else{
+    comprehension = Math.max(comprehension, 10);
   }
 
   return {
-    roots: selectedRoots,
+    name:generateName(gender),
+    spiritRoots: selectedRoots,
     purities,
     gender,
     comprehension
@@ -96,3 +101,31 @@ function weightedRandom(options: {value: number, weight: number}[]) {
   }
   return options[options.length - 1].value;
 }
+
+
+// 新增随机姓名生成方法
+function generateName(gender: GenderEnum): string {
+  const surname = SURNAMES[Math.floor(Math.random() * SURNAMES.length)];
+  const namePool = gender === GenderEnum.MALE ? MALE_NAMES : FEMALE_NAMES;
+  const givenName = namePool[Math.floor(Math.random() * namePool.length)];
+  
+  // 50%概率单字名，50%概率双字名
+  return Math.random() > 0.5 
+    ? `${surname}${givenName}` 
+    : `${surname}${givenName}${namePool[Math.floor(Math.random() * namePool.length)]}`;
+}
+
+const SURNAMES = [
+  '赵', '钱', '孙', '李', '周', '吴', '郑', '王', 
+  '冯', '陈', '褚', '卫', '蒋', '沈', '韩', '杨'
+];
+
+const MALE_NAMES = [
+  '天', '宇', '浩', '杰', '俊', '明', '强', '伟',
+  '飞', '磊', '超', '勇', '军', '波', '涛', '龙'
+];
+
+const FEMALE_NAMES = [
+  '芳', '娜', '敏', '静', '秀', '娟', '英', '华',
+  '慧', '巧', '美', '玉', '兰', '萍', '红', '玲'
+];

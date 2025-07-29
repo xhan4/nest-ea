@@ -9,10 +9,6 @@ export class Sect {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Character, character => character.foundedSect)
-  @JoinColumn()
-  founder: Character;
-
   @Column({ length: 100, unique: true })
   name: string;
 
@@ -22,16 +18,10 @@ export class Sect {
   @Column({ default: 1 })
   level: number;
 
-  @Column({ default: 0 })
-  reputation: number;
-
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @Column({ default: 1000 })
-  funds: number;
-
-  @Column({ default: 50 })
+  @Column({ default: 30 })
   maxMembers: number;
 
   @Column({ nullable: true })
@@ -43,10 +33,10 @@ export class Sect {
   @OneToMany(() => SpiritualField, field => field.sect)
   spiritualFields: SpiritualField[];
 
-  @OneToOne(() => Inventory, inventory => inventory.sect)
-  inventory: Inventory[];
-
-  @OneToOne(() => Character)
+  @OneToMany(() => Inventory, inventory => inventory.sect)
+  inventories: Inventory[];
+  
+  @OneToOne(() => Character, character => character.sect)
   @JoinColumn()
-  leader: Character; 
+  founder: Character;
 }

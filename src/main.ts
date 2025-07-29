@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './core/filter/http-exception/http-exception.filter';
 import { TransformInterceptor } from './core/interceptor/transform/transform.interceptor';
 import { ValidationPipe } from '@nestjs/common';
+import { NextFunction } from 'express';
 async function bootstrap() {
   const app: any = await NestFactory.create(AppModule);
   // 注册全局错误的过滤器
@@ -19,6 +20,10 @@ async function bootstrap() {
     origin: true, // Allow all origins (for development)
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
+  });
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
   });
   await app.listen(process.env.PORT ?? 3000);
 }

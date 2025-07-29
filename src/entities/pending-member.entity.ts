@@ -1,26 +1,21 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Sect } from "./sect.entity";
-import { Character } from "./character.entity";
 import { GenderEnum } from "src/core/enums/gender.enum";
+import { Character } from "./character.entity";
 
-@Entity("tb_sect_member")
-@Unique(['sect', 'character'])
-export class SectMember {
+@Entity("tb_pending_member")
+export class PendMember {
   @PrimaryGeneratedColumn()
   id: number;
-  
-  @Column()
-  name: string;
-
   @Column({
     type: 'enum',
     enum: ['LEADER', 'ELDER', 'DISCIPLE', 'INNER', 'OUTER'],
     default: 'DISCIPLE'
   })
   rank: string;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  joined_at: Date;
+  
+  @Column()
+  name: string;
 
   @Column({ default: 60 })
   maxLifespan: number;
@@ -51,9 +46,17 @@ export class SectMember {
   })
   spiritRoots: string[];
 
-  @ManyToOne(() => Sect, sect => sect.members)
+  @Column({ type: 'timestamp' })
+  arriveTime: Date;
+
+  @Column({ default: 24 })
+  expireHours: number;
+
+  
+  @ManyToOne(() => Sect)
   sect: Sect;
 
   @ManyToOne(() => Character, character => character.sectMembers)
   character: Character;
+
 }

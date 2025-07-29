@@ -8,16 +8,15 @@ export class Inventory {
     @PrimaryGeneratedColumn()
     id: number;
 
-
     @ManyToOne(() => Item)
     item: Item;
 
     @Column()
     count: number;
 
-    @OneToOne(() => Character, character => character.inventory)
+    @ManyToOne(() => Character, character => character.inventories)
     character: Character;
 
-    @OneToOne(() => Sect, sect => sect.inventory)
+    @ManyToOne(() => Sect, sect => sect.inventories)
     sect: Sect;
 }
