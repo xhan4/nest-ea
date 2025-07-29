@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+            box-sizing: border-box;
+        }
+    </style>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div>admin</div>
+         
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3005'; // 根据你的API地址修改
+        const defaultHeaders = {
+            ['x-app-id']: 'WEB_CLIENT',
+        }
+        let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfQURNSU4iLCJyb2xlcyI6WyIyIl0sImlhdCI6MTc1Mzc3Njk4MiwiZXhwIjoxNzUzODYzMzgyfQ.OC9SmNkBwk0rFiJTLcgA_BaGEC6NoUb--zMlnNt56Cw';
+        const socket = io('http://localhost:3005', {
+            path: '/ws',       // 匹配服务端路径
+            transports: ['websocket'], // 强制使用 WebSocket
+            autoConnect: true,
+            auth: {
+                token
+            }
+        });
+        socket.on('connect', () => {
+            console.log('[WebSocket] ✅ 连接成功! ID:', socket.id);
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('[WebSocket] 🔴 连接失败:', error.message);
+            console.error('[WebSocket] 错误详情:', error);
+
+            // 尝试获取更多错误信息
+            if (error.type === 'TransportError') {
+                console.error('[WebSocket] 传输错误:', error.description);
+            } else if (error.type === 'UnauthorizedError') {
+                console.error('[WebSocket] 认证失败:', error.message);
+            }
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log('[WebSocket] 🟠 断开连接:', reason);
+
+            if (reason === 'io server disconnect') {
+                console.log('[WebSocket] 服务端主动断开');
+            } else if (reason === 'io client disconnect') {
+                console.log('[WebSocket] 客户端主动断开');
+            }
+        });
+
+        socket.on('reconnect_attempt', (attempt) => {
+            console.log(`[WebSocket] 🔄 重连尝试 (${attempt}/5)`);
+        });
+
+        socket.on('reconnect', (attempt) => {
+            console.log(`[WebSocket] ✅ 重连成功! 尝试次数: ${attempt}`);
+        });
+
+        socket.on('reconnect_error', (error) => {
+            console.error('[WebSocket] 🔴 重连失败:', error.message);
+        });
+
+        socket.on('reconnect_failed', () => {
+            console.error('[WebSocket] ❌ 重连完全失败，停止尝试');
+        });
+
+        // 监听所有事件（调试用）
+        socket.onAny((event, ...args) => {
+            console.log(`[WebSocket] 📤 收到事件: ${event}`, args);
+        });
+
+    </script>
+</body>
+
+</html>

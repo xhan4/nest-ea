@@ -15,8 +15,9 @@ export class CharacterController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.characterService.findOne(+id);
+  findOne(@Param('id') id: string,@Req() req) {
+    const userId = req.user.id;
+    return this.characterService.findOne(+id,userId);
   }
 
   @Post('update/:id')

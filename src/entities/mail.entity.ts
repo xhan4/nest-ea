@@ -26,7 +26,7 @@ export class Mail {
   @Column({ type: 'text' })  // 改为text类型支持更长的内容
   content: string;
 
-  @Column()
+  @Column({ default: 1 })
   quantity: number;
    
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })

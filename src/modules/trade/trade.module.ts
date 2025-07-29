@@ -4,7 +4,7 @@ import { Trade } from '../../entities/trade.entity';
 import { TradeController } from './trade.controller';
 import { TradeService } from './trade.service';
 import { Inventory } from 'src/entities/inventory.entity';
-import { NotifyGateway } from '../notify/notify.gateway';
+import { NotifyGateway } from '../mail/notify.gateway';
 import { User } from 'src/entities/user.entity';
 import { Item } from 'src/entities/item.entity';
 import { Transaction } from 'src/entities/transaction.entity';

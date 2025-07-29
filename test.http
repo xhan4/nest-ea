@@ -1,12 +1,23 @@
 @BASE_URL = http://localhost:3005
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwicm9sZXMiOlsiMSJdLCJpYXQiOjE3NTM3Njc5MTIsImV4cCI6MTc1Mzg1NDMxMn0.mkK9mwu0kCqpSMqbTOZ2E_LFVkdCkY2BqUP0hQN8Dc8
+ @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwicm9sZXMiOlsiMSJdLCJpYXQiOjE3NTM3Njc5MTIsImV4cCI6MTc1Mzg1NDMxMn0.mkK9mwu0kCqpSMqbTOZ2E_LFVkdCkY2BqUP0hQN8Dc8
+# @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfQURNSU4iLCJyb2xlcyI6WyIyIl0sImlhdCI6MTc1Mzc3Njk4MiwiZXhwIjoxNzUzODYzMzgyfQ.OC9SmNkBwk0rFiJTLcgA_BaGEC6NoUb--zMlnNt56Cw
 ### 登录
 POST {{BASE_URL}}/user/login
 Content-Type: application/json
 x-app-id: WEB_ADMIN
 
 {
-    "username": "admin",
+    "username": "test001",
+    "password": "123456"
+}
+
+###
+POST {{BASE_URL}}/user/register
+Content-Type: application/json
+x-app-id: WEB_ADMIN
+
+{
+    "username": "test002",
     "password": "123456"
 }
 
@@ -17,7 +28,7 @@ Authorization: Bearer {{token}}
 x-app-id: WEB_ADMIN
 
 ###
-GET  {{BASE_URL}}/user/3
+GET  {{BASE_URL}}/user/6
 Content-Type: application/json
 Authorization: Bearer {{token}}
 x-app-id: WEB_ADMIN
@@ -35,7 +46,7 @@ Authorization: Bearer {{token}}
 x-app-id: WEB_ADMIN
 
 {
-    "name": "张三",
+    "name": "test001",
     "gender": "MALE",
     "comprehension": 50,
     "spiritRoots": ["METAL", "WOOD"],
@@ -48,15 +59,21 @@ x-app-id: WEB_ADMIN
 }
 
 ###
+GET {{BASE_URL}}/character/9
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+###
 POST {{BASE_URL}}/sect/create
 Content-Type: application/json
 Authorization: Bearer {{token}}
 x-app-id: WEB_ADMIN
 
 {
-    "name": "qingyunzong",
+    "name": "guiyimen",
     "description": "sect1 description",
-    "founderId": 1
+    "founderId": 9
 }
 ###
 POST {{BASE_URL}}/sect/update/1
@@ -70,23 +87,49 @@ x-app-id: WEB_ADMIN
 }
 
 ###
-GET {{BASE_URL}}/sect/members?sectId=1
+POST {{BASE_URL}}/sect/generate
 Content-Type: application/json
 Authorization: Bearer {{token}}
 x-app-id: WEB_ADMIN
 
 ###
-GET {{BASE_URL}}/sect/pendings?sectId=1
+GET {{BASE_URL}}/sect/members?sectId=2
 Content-Type: application/json
 Authorization: Bearer {{token}}
 x-app-id: WEB_ADMIN
 
 ###
-POST {{BASE_URL}}/sect/process/41
+GET {{BASE_URL}}/sect/pendings?sectId=2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+###
+POST {{BASE_URL}}/sect/process/48
 Content-Type: application/json
 Authorization: Bearer {{token}}
 x-app-id: WEB_ADMIN
 
 {
-    "accept": false
+    "accept": true
+}
+
+###
+POST {{BASE_URL}}/mail/reward
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+{
+    "mailType": "SYSTEM_AWARD",
+    "subject": "test",
+    "content": "test",
+    "characterIds": [9],
+    "rewards": [
+        {
+            "type": 1,
+            "itemId": 1,
+            "amount": 1
+        }
+    ]
 }

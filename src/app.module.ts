@@ -16,7 +16,6 @@ import { TradeModule } from './modules/trade/trade.module';
 import { Inventory } from './entities/inventory.entity';
 import { Item } from './entities/item.entity';
 import { Trade } from './entities/trade.entity';
-import { NotifyModule } from './modules/notify/notify.module';
 import { Mail } from './entities/mail.entity';
 import { Transaction } from './entities/transaction.entity';
 import { RolesGuard } from './core/auth/roles.guard';
@@ -68,7 +67,6 @@ import { PendMember } from './entities/pending-member.entity';
     ItemModule,
     MailModule,
     TradeModule,
-    NotifyModule,
     CharacterModule,
     SectModule,
   ],

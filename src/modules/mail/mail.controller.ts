@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Req, Param, Body } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { MailType, REWARDTYPE } from 'src/entities/mail.entity';
+import { Roles } from 'src/core/decorators/rules.decorator';
+import { RoleEnum } from 'src/core/enums/roles.enum';
 
 @Controller('mail')
 export class MailController {
@@ -18,7 +20,8 @@ export class MailController {
     const {characterId} = req.query;
     return this.mailService.claimAttachment(mailId, characterId);
   }
-
+  
+  @Roles(RoleEnum.ADMIN)
   @Post('reward')
   async sendSystemBroadcast(
     @Body('mailType') mailType:MailType,

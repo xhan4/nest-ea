@@ -60,7 +60,7 @@ export class SectService implements OnModuleInit {
       where: { sect: { id: sectId } },
     });
   }
-
+  
   @Cron('0 0 */4 * * *')
   async generatePotentialDisciples() {
     const sects = await this.sectRepository.find({

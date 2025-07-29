@@ -1,11 +1,11 @@
-import { Controller, Get, Post, Body,Param, Req, BadRequestException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Req, BadRequestException, Query } from '@nestjs/common';
 import { SectService } from './sect.service';
 import { CreateSectDto } from './dto/create-sect.dto';
 import { UpdateSectDto } from './dto/update-sect.dto';
 
 @Controller('sect')
 export class SectController {
-  constructor(private readonly sectService: SectService) {}
+  constructor(private readonly sectService: SectService) { }
 
   @Post('create')
   create(@Body() createSectDto: CreateSectDto) {
@@ -14,6 +14,11 @@ export class SectController {
   @Get('sect_list')
   getSectList() {
     return this.sectService.getSectList();
+  }
+
+  @Post('generate')
+  async generateDisciples() {
+    return this.sectService.generatePotentialDisciples();
   }
 
   @Get('pendings')
@@ -25,7 +30,7 @@ export class SectController {
   getSectMembers(@Query('sectId') sectId: string) {
     return this.sectService.findSectMembers(+sectId);
   }
-  
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.sectService.findOne(+id);
@@ -37,8 +42,8 @@ export class SectController {
   }
 
   @Post('process/:id')
-  processDisciple(@Param('id') id: string,@Body("accept") accept:boolean) {
-    return this.sectService.processDisciple(+id,accept);
+  processDisciple(@Param('id') id: string, @Body("accept") accept: boolean) {
+    return this.sectService.processDisciple(+id, accept);
   }
 
 }

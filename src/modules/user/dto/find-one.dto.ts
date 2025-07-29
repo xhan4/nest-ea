@@ -9,5 +9,5 @@ export class FindOneDto {
   active: number;
   create_time: Date;
   update_time: Date;
-  character: number;
+  characterId: number;
 }

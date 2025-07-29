@@ -32,7 +32,7 @@ export class UserService {
       active: user.active,
       create_time: user.create_time,
       update_time: user.update_time,
-      character: user.character?.id??null,
+      characterId: user.character?.id??null,
     }
   }
   findAll(): Promise<User[]> {
@@ -93,6 +93,7 @@ export class UserService {
       username: user.username, 
       id: user.id, 
       appId: user.appId,
+      characterId:user.character?.id??null,
       roles: user.roles // 添加roles信息
     };
     const userInfo = {
@@ -104,7 +105,7 @@ export class UserService {
       active: user.active,
       create_time: user.create_time,
       update_time: user.update_time,
-      character: user.character?.id??null,
+      characterId: user.character?.id??null,
     }
     const token = this.jwtService.sign(payload, { expiresIn: this.configService.get("JWT_EXP") });
     const refreshToken = this.jwtService.sign({ id: user.id }, { expiresIn: this.configService.get("JWT_REFRESH_EXP") })

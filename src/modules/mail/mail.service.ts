@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Item } from '../../entities/item.entity';
 import { Mail, MailType, REWARDTYPE } from '../../entities/mail.entity';
 import { Inventory } from '../../entities/inventory.entity';
-import { NotifyGateway } from '../notify/notify.gateway';
+import { NotifyGateway } from './notify.gateway';
 import { Character } from 'src/entities/character.entity';
 
 @Injectable()
@@ -139,14 +139,15 @@ export class MailService {
   ) {
     return this.mailRepo.manager.transaction(async (manager) => {
       const mails = characterIds.map(characterId => {
-        return manager.save({
-          recipient: characterId,
-          mailType,
-          subject,
-          content,
-          rewards,
-          sentAt: new Date(),
-        });
+         const mail = this.mailRepo.create({
+        recipient: {id:characterId},
+        mailType,
+        subject,
+        content,
+        rewards,
+        sentAt: new Date(),
+      });
+        return manager.save(mail);
       });
       await Promise.all(mails);
       this.notifyGateway.server.emit('new_mail', {});

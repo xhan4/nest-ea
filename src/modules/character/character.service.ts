@@ -10,42 +10,46 @@ export class CharacterService {
   constructor(
     @InjectRepository(Character)
     private characterRepository: Repository<Character>,
-  ) {}
+  ) { }
 
   async create(createCharacterDto: CreateCharacterDto): Promise<Character> {
     const character = this.characterRepository.create({
-        ...createCharacterDto,
-        user: { id: createCharacterDto.userId },
-        created_at: new Date(),
-        lastAgingTime: new Date(),
+      ...createCharacterDto,
+      user: { id: createCharacterDto.userId },
+      created_at: new Date(),
+      lastAgingTime: new Date(),
     });
-    console.log(character,'character')
     return await this.characterRepository.save(character);
-}
+  }
 
-  async findOne(id: number): Promise<Character> {
-    return await this.characterRepository.findOne({ 
-      where: { id },
-      relations: ['user', 'foundedSect', 'sectMembers']
+  async findOne(id: number, userId: number): Promise<Character> {
+    console.log(id, userId)
+    const character = await this.characterRepository.findOne({
+      where: { id, user: { id: userId } },
+      relations: ['sect', 'sectMembers']
     });
+    if (character?.sect) {
+      character.sect = { id: character.sect.id } as any;
+    }
+    return character
   }
 
   async update(id: number, updateCharacterDto: UpdateCharacterDto): Promise<Character> {
-    await this.characterRepository.update(id,{
+    await this.characterRepository.update(id, {
       ...updateCharacterDto,
       user: { id: updateCharacterDto.userId }, // 将数字ID转换为User对象
     });
-    return this.findOne(id);
+    return this.findOne(id, updateCharacterDto.userId);
   }
 
-  async levelUp(id: number): Promise<Character> {
-    const character = await this.findOne(id);
+  async levelUp(id: number, userId: number): Promise<Character> {
+    const character = await this.findOne(id, userId);
     character.level += 1;
     return await this.characterRepository.save(character);
   }
 
-  async gainExperience(id: number, amount: number): Promise<Character> {
-    const character = await this.findOne(id);
+  async gainExperience(id: number, amount: number, userId: number): Promise<Character> {
+    const character = await this.findOne(id, userId);
     character.experience += amount;
     return await this.characterRepository.save(character);
   }

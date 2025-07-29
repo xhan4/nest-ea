@@ -49,6 +49,7 @@ export class UserController {
     }
 
     //根据id查询用户信息
+    @Roles(RoleEnum.ADMIN)
     @Get(":id")
     getUser(@Param('id', ParseIntPipe) id: number) {
         return this.userService.findOne(id)

@@ -3,14 +3,13 @@ import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Mail } from 'src/entities/mail.entity';
-import { NotifyModule } from '../notify/notify.module';
+import { NotifyGateway } from './notify.gateway';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Mail]),
-    NotifyModule,
+    TypeOrmModule.forFeature([Mail])
   ],
   controllers: [MailController],
-  providers: [MailService],
+  providers: [MailService,NotifyGateway],
 })
 export class MailModule {}
