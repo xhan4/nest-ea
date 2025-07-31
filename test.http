@@ -1,13 +1,13 @@
 @BASE_URL = http://localhost:3005
- @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwicm9sZXMiOlsiMSJdLCJpYXQiOjE3NTM3Njc5MTIsImV4cCI6MTc1Mzg1NDMxMn0.mkK9mwu0kCqpSMqbTOZ2E_LFVkdCkY2BqUP0hQN8Dc8
-# @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfQURNSU4iLCJyb2xlcyI6WyIyIl0sImlhdCI6MTc1Mzc3Njk4MiwiZXhwIjoxNzUzODYzMzgyfQ.OC9SmNkBwk0rFiJTLcgA_BaGEC6NoUb--zMlnNt56Cw
+ @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfQURNSU4iLCJjaGFyYWN0ZXJJZCI6OSwicm9sZXMiOlsiMiJdLCJpYXQiOjE3NTM5NTA4MzYsImV4cCI6MTc1NDAzNzIzNn0.gso2kxlnc6Irbwh_aSFDYozumIucYhPsz2Unm1LhveA
+@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwiY2hhcmFjdGVySWQiOjEsInJvbGVzIjpbIjEiXSwiaWF0IjoxNzUzOTUyNDAxLCJleHAiOjE3NTQwMzg4MDF9.bmb8tjr-9gBLCMxF2B_O0Oexi3RedNaXjvf4vrbJ0bA
 ### 登录
 POST {{BASE_URL}}/user/login
 Content-Type: application/json
 x-app-id: WEB_ADMIN
 
 {
-    "username": "test001",
+    "username": "admin",
     "password": "123456"
 }
 
@@ -133,3 +133,61 @@ x-app-id: WEB_ADMIN
         }
     ]
 }
+
+
+###
+POST {{BASE_URL}}/farm/cultivate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+{
+    "sectId": 2,
+    "position":{
+        "x":0,
+        "y":0
+    }
+}
+###
+POST {{BASE_URL}}/items/create_item
+Content-Type: application/json
+Authorization: Bearer {{token2}}
+x-app-id: WEB_ADMIN
+
+{
+    "name": "test item",
+    "desc": "test item description",
+    "price": 100,
+    "type": "seed"
+}
+
+###
+POST {{BASE_URL}}/inventory/add_item
+Content-Type: application/json
+Authorization: Bearer {{token2}}
+x-app-id: WEB_ADMIN
+
+{
+    "itemId": 4,
+    "count": 10,
+    "characterId": 9,
+    "sectId": 2
+}
+###
+POST {{BASE_URL}}/farm/plant_seed
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+{
+    "sectId": 2,
+    "plotId": 1,
+    "seedId": 4
+}
+
+###
+GET {{BASE_URL}}/farm/plot_list?sectId=2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
@@ -33,7 +33,11 @@ export class NotifyGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.data = payload;
         next();
       } catch (error) {
-        next(new HttpException('Token验证失败', HttpStatus.FORBIDDEN));
+        if (error instanceof TokenExpiredError) {
+          next(new HttpException('Token已过期，请重新登录或刷新Token', HttpStatus.REQUEST_TIMEOUT));
+        } else {
+          next(new HttpException('Token验证失败', HttpStatus.FORBIDDEN));
+        }
       }
     });
   }

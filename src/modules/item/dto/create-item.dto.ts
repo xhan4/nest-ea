@@ -12,8 +12,4 @@ export class CreateItemDto {
 
   @IsNumber()
   price: number;
-  
-  create_time:Date
-  
-  create_by: number;
 }

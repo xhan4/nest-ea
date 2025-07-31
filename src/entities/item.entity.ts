@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 @Entity("tb_item")
 export class Item {
     @PrimaryGeneratedColumn()
@@ -24,4 +24,8 @@ export class Item {
 
     @Column()
     create_by: number;
+    
+    @OneToOne(() => Item, item => item.id)
+    @JoinColumn()
+    grown: Item;
 }

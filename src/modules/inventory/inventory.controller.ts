@@ -19,13 +19,13 @@ export class InventoryController {
     return this.service.getItemDetail(itemId);
   }
 
-  @Post('/addItem')
+  @Post('/add_item')
   async addItem(@Body() addItemDto: AddItemDto, @Req() req:any) {
-    const { itemId, count,characterId} = addItemDto;
-    return this.service.addItemToInventory(characterId, itemId, count);
+    const { itemId, count,characterId,sectId} = addItemDto;
+    return this.service.addItemToInventory(characterId, itemId, count,sectId);
   }
 
-  @Post('/removeItem')
+  @Post('/remove_item')
   async removeItem(@Body() removeItemDto: RemoveItemDto) {
     const { characterId,itemId,count} = removeItemDto;
     return this.service.removeItemFromInventory(characterId, itemId,count);

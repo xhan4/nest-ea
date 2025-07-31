@@ -12,9 +12,12 @@ export class ItemService {
     private itemRepo: Repository<Item>
   ) {}
 
-  async createItem(createDto: CreateItemDto) {
+  async createItem(createDto: CreateItemDto,userId:number) {
+
     const item = this.itemRepo.create({
-      ...createDto
+      ...createDto,
+      create_time: new Date(),
+      create_by: userId,
     });
     return this.itemRepo.save(item);
   }

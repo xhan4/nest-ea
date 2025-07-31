@@ -10,9 +10,10 @@ export class ItemController {
   constructor(private readonly service: ItemService) {}
   
   @Roles(RoleEnum.ADMIN)
-  @Post()
-  async createItem(@Body() createDto: CreateItemDto) {
-    return this.service.createItem(createDto);
+  @Post("create_item")
+  async createItem(@Body() createDto: CreateItemDto,@Req() req:any) {
+    const userId = req.user.id;
+    return this.service.createItem(createDto,userId);
   }
 
   @Roles(RoleEnum.ADMIN)

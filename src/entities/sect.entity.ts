@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Character } from "./character.entity";
 import { SectMember } from "./sect-member.entity";
-import { SpiritualField } from "./spiritual-field.entity";
 import { Inventory } from "./inventory.entity";
+import { Plot } from "./plot.entity";
 
 @Entity("tb_sect")
 export class Sect {
@@ -30,13 +30,13 @@ export class Sect {
   @OneToMany(() => SectMember, member => member.sect)
   members: SectMember[];
 
-  @OneToMany(() => SpiritualField, field => field.sect)
-  spiritualFields: SpiritualField[];
-
   @OneToMany(() => Inventory, inventory => inventory.sect)
   inventories: Inventory[];
   
   @OneToOne(() => Character, character => character.sect)
   @JoinColumn()
   founder: Character;
+  
+  @OneToMany(() => Plot, plot => plot.sect)
+  plots: Plot[];
 }

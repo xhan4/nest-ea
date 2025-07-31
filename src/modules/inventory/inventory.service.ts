@@ -45,7 +45,8 @@ export class InventoryService {
     });
   }
 
-  async addItemToInventory(characterId: number, itemId: number, count: number) {
+  async addItemToInventory(characterId: number, itemId: number, count: number,sectId:number) {
+
     return this.inventoryRepo.manager.transaction(async (manager) => {
       // 查找是否已有该物品
       const existingItem = await manager.findOne(Inventory, {
@@ -64,6 +65,7 @@ export class InventoryService {
         // 否则创建新记录
         const newItem = manager.create(Inventory, {
           character: { id: characterId },
+          sect:{id:sectId},
           item: { id: itemId },
           count
         });

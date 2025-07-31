@@ -26,12 +26,14 @@ export class CharacterService {
     console.log(id, userId)
     const character = await this.characterRepository.findOne({
       where: { id, user: { id: userId } },
-      relations: ['sect', 'sectMembers']
+      relations: ['sect']
     });
     if (character?.sect) {
       character.sect = { id: character.sect.id } as any;
     }
-    return character
+    return {
+      ...character
+    }
   }
 
   async update(id: number, updateCharacterDto: UpdateCharacterDto): Promise<Character> {

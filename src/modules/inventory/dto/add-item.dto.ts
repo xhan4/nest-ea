@@ -12,6 +12,12 @@ export class AddItemDto {
   @IsNumber()
   @IsPositive()
   characterId: number;
+
+  
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  @IsPositive()
+  sectId: number;
   
   @Transform(({ value }) => Number(value))
   @IsNumber()

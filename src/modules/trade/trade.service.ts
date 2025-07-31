@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Trade, TradeStatus } from "src/entities/trade.entity";
-import { User } from "src/entities/user.entity";
 import { Item } from "src/entities/item.entity";
 import { Inventory } from "src/entities/inventory.entity";
 
