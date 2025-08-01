@@ -6,7 +6,7 @@ import { Plot } from 'src/entities/plot.entity';
 import { Plant } from 'src/entities/plant.entity';
 import { Inventory } from 'src/entities/inventory.entity';
 import { Sect } from 'src/entities/sect.entity';
-import { NotifyGateway } from '../mail/notify.gateway';
+import { NotifyGateway } from 'src/core/gateway/notify.gateway';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Plot,Plant,Inventory,Sect])],

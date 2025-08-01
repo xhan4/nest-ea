@@ -1,3 +1,4 @@
+import { ItemType } from "src/core/enums/item-type.enum";
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 @Entity("tb_item")
 export class Item {
@@ -8,7 +9,7 @@ export class Item {
     name: string;
 
     @Column()
-    type: string;
+    type: ItemType;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     price: number;

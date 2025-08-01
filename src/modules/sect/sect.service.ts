@@ -66,7 +66,6 @@ export class SectService implements OnModuleInit {
     const sects = await this.sectRepository.find({
       relations: ['founder']
     });
-    
     for (const sect of sects) {
       const memberCount = await this.sectMemberRepo.count({ 
         where: { sect: { id: sect.id } }

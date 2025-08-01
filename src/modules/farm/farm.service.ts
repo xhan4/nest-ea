@@ -7,7 +7,8 @@ import { Plant } from '../../entities/plant.entity';
 import { Inventory } from '../../entities/inventory.entity';
 import { ItemType } from 'src/core/enums/item-type.enum';
 import { GrowthStatus } from 'src/core/enums/grow.enum';
-import { NotifyGateway } from '../mail/notify.gateway';
+import { NotifyGateway } from 'src/core/gateway/notify.gateway';
+import { EventType } from 'src/core/enums/event.enum';
 
 @Injectable()
 export class FarmService {
@@ -41,7 +42,8 @@ export class FarmService {
       throw new BadRequestException('该地块已种植作物');
     }
     const inventoryItem = await this.inventoryRepository.findOne({
-      where: { sect: { id: sectId }, item: {id:seedId,type:'seed'},  },
+      where: { sect: { id: sectId }, item: {id:seedId,type:ItemType.SEED},  },
+
     });
     if (!inventoryItem || inventoryItem.count <= 0) {
       throw new BadRequestException('仓库中没有足够的种子');
@@ -130,7 +132,7 @@ export class FarmService {
         plant.growthStatus = GrowthStatus.SEED;
       }
       await this.plantRepository.save(plant);
-      this.notifyGateway.server.to(`${plant.plot.sect.founder.id}`).emit('plantGrowthUpdate', plant);
+      this.notifyGateway.server.to(`${plant.plot.sect.founder.id}`).emit(EventType.PLANT_GROWTH, plant);
     }
   }
 }

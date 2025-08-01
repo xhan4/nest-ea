@@ -1,8 +1,9 @@
 import { Controller, Get, Post, Req, Param, Body } from '@nestjs/common';
 import { MailService } from './mail.service';
-import { MailType, REWARDTYPE } from 'src/entities/mail.entity';
 import { Roles } from 'src/core/decorators/rules.decorator';
 import { RoleEnum } from 'src/core/enums/roles.enum';
+import { Item } from 'src/entities/item.entity';
+import { ItemType } from 'src/core/enums/item-type.enum';
 
 @Controller('mail')
 export class MailController {
@@ -24,16 +25,16 @@ export class MailController {
   @Roles(RoleEnum.ADMIN)
   @Post('reward')
   async sendSystemBroadcast(
-    @Body('mailType') mailType:MailType,
     @Body('subject') subject:string,
     @Body('content') content:string,
     @Body('characterIds') characterIds: number[],
     @Body('rewards') rewards: Array<{
-      type: REWARDTYPE;
-      itemId?: number;
+      type: ItemType;
+      itemId: number;
+      itemName: string;
       amount: number;
     }>
   ) {
-    return this.mailService.sendBatchRewards(mailType,subject,content,characterIds,rewards);
+    return this.mailService.sendBatchRewards(subject,content,characterIds,rewards);
   }
 }

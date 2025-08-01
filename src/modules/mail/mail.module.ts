@@ -3,7 +3,7 @@ import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Mail } from 'src/entities/mail.entity';
-import { NotifyGateway } from './notify.gateway';
+import { NotifyGateway } from 'src/core/gateway/notify.gateway';
 
 @Module({
   imports: [
