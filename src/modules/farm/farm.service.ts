@@ -115,7 +115,7 @@ export class FarmService {
   async updatePlantGrowth() {
     const growingPlants = await this.plantRepository.find({
       where: { growthStatus: Not(GrowthStatus.HARVESTED) },
-      relations: ['plot'],
+      relations: ['plot', 'plot.sect', 'plot.sect.founder'],
     });
 
     for (const plant of growingPlants) {
