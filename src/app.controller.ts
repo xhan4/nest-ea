@@ -5,7 +5,7 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get("/time")
+  @Get("/sys_time")
   getServerTime() {
     return this.appService.getServerTime();
   }
