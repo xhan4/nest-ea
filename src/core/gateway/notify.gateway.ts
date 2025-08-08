@@ -42,14 +42,14 @@ export class NotifyGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
   handleConnection(client: Socket) {
-    const characterId = client.data.id;
+    const characterId = client.data.characterId;
     if (characterId) {
       this.connectedClients.set(Number(characterId), client);
     }
   }
 
   handleDisconnect(client: Socket) {
-    const characterId = client.data.id;
+    const characterId = client.data.characterId;
     if (characterId) {
       this.connectedClients.delete(Number(characterId));
     }

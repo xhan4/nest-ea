@@ -51,7 +51,7 @@
         const defaultHeaders = {
             ['x-app-id']: 'WEB_CLIENT',
         }
-        let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfQURNSU4iLCJjaGFyYWN0ZXJJZCI6OSwicm9sZXMiOlsiMiJdLCJpYXQiOjE3NTM5NTA4MzYsImV4cCI6MTc1NDAzNzIzNn0.gso2kxlnc6Irbwh_aSFDYozumIucYhPsz2Unm1LhveA';
+        let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfR0FNRSIsImNoYXJhY3RlcklkIjo5LCJyb2xlcyI6WyIyIl0sImlhdCI6MTc1NDY0MTI2NSwiZXhwIjoxNzU0NzI3NjY1fQ.nzGV32Y8XpaQ2u3oxxjRVmTollGqRClN6gx8zbz-Yjo';
         const socket = io('http://localhost:3005', {
             path: '/ws',       // 匹配服务端路径
             transports: ['websocket'], // 强制使用 WebSocket

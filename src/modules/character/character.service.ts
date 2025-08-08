@@ -23,7 +23,6 @@ export class CharacterService {
   }
 
   async findOne(id: number, userId: number): Promise<Character> {
-    console.log(id, userId)
     const character = await this.characterRepository.findOne({
       where: { id, user: { id: userId } },
       relations: ['sect']

@@ -96,6 +96,7 @@ export class UserService {
       characterId:user.character?.id??null,
       roles: user.roles // 添加roles信息
     };
+
     const userInfo = {
       userId: user.id,
       username: user.username,
