@@ -22,11 +22,9 @@ export class MailService {
       where: {
         recipient: { id: characterId }
       },
-      relations: ['itemAttachment'],
       skip,
       take: pagesize
     });
-   
     return {
       mails,
       total,

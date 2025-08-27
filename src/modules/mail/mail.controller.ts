@@ -2,7 +2,6 @@ import { Controller, Get, Post, Req, Param, Body } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { Roles } from 'src/core/decorators/rules.decorator';
 import { RoleEnum } from 'src/core/enums/roles.enum';
-import { Item } from 'src/entities/item.entity';
 import { ItemType } from 'src/core/enums/item-type.enum';
 
 @Controller('mail')
@@ -11,9 +10,17 @@ export class MailController {
 
   @Get('list')
   async getInbox(@Req() req) {
-    const {characterId} = req.query;
+    const {characterId,current,pagesize} = req.query;
     // 实现获取用户邮件列表逻辑
-    return this.mailService.getMailListById(characterId);
+    return this.mailService.getMailListById(characterId,current,pagesize);
+  }
+
+  @Get('list_by_characterId')
+  async getInboxByCharacterId(@Req() req) {
+    const {current,pagesize} = req.query;
+    const {characterId} = req.user;
+    // 实现获取用户邮件列表逻辑
+    return this.mailService.getMailListById(characterId,current,pagesize);
   }
 
   @Post('claim/:mailId')

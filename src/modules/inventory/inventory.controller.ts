@@ -9,11 +9,17 @@ export class InventoryController {
   constructor(private readonly service: InventoryService) {}
 
   @Get('/list')
-  async getItemsByCharacter(@Req() req:any) {
-   const {current,pagesize,characterId} = req.query
+  async getItemsOwner(@Req() req:any) {
+   const {current,pagesize} = req.query
+   const {characterId} = req.user
     return this.service.getCharacterItems(characterId,current,pagesize);
   }
 
+  @Get('/list_by_characterId')
+  async getItemsByCharacterId(@Req() req:any) {
+   const {current,pagesize,characterId} = req.query
+    return this.service.getCharacterItems(characterId,current,pagesize);
+  }
   @Get('/detail/:itemId')
   async getItemDetail(@Param('itemId') itemId: number) {
     return this.service.getItemDetail(itemId);

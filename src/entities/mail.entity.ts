@@ -12,9 +12,6 @@ export class Mail {
 
   @Column({ type: 'text' })  //text类型支持更长的内容
   content: string;
-
-  @Column({ default: 1 })
-  quantity: number;
    
   @Column({ type: 'json', nullable: true })
   rewards: Array<{

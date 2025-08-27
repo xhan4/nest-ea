@@ -1,12 +1,12 @@
 @BASE_URL = http://localhost:3005
  @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwiY2hhcmFjdGVySWQiOjEsInJvbGVzIjpbIjEiXSwiaWF0IjoxNzU0NjMzMDA3LCJleHAiOjE3NTQ3MTk0MDd9.XMVc9tBKhoLtt97dA9-AH6qSmz5P5yt8AEeVc3hyaUI
-@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfR0FNRSIsImNoYXJhY3RlcklkIjo5LCJyb2xlcyI6WyIyIl0sImlhdCI6MTc1NDY0MDY5NSwiZXhwIjoxNzU0NzI3MDk1fQ.xuU7DM8Nl7YyfTyIamqMB_lS-wTY5ImHwVTcQD5htyc
+@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfR0FNRSIsImNoYXJhY3RlcklkIjo5LCJyb2xlcyI6WyIyIl0sImlhdCI6MTc1NDg3NTU1NSwiZXhwIjoxNzU0OTYxOTU1fQ.0O5SpTp6mFlBa8YEMvQVumRBnqHJ67XQbSPo5szR4aw
 POST {{BASE_URL}}/user/login
 Content-Type: application/json
-x-app-id: WEB_ADMIN
+x-app-id: WEB_GAME
 
 {
-    "username": "admin",
+    "username": "test001",
     "password": "123456"
 }
 
@@ -190,3 +190,14 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 x-app-id: WEB_ADMIN
 
+###
+GET {{BASE_URL}}/mail/list_by_characterId?current=1&pagesize=20
+Content-Type: application/json
+Authorization: Bearer {{token2}}
+x-app-id: WEB_ADMIN
+
+###
+GET {{BASE_URL}}/inventory/list?current=1&pagesize=20
+Content-Type: application/json
+Authorization: Bearer {{token2}}
+x-app-id: WEB_ADMIN
