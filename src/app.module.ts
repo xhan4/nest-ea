@@ -1,12 +1,18 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import envConfig from '../config/env';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
-import { User } from './modules/user/entity/user.entity';
+import { User } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthGuard } from './core/auth/auth.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { Mail } from './entities/mail.entity';
+import { MailModule } from './modules/mail/mail.module';
+import { RolesGuard } from './core/auth/roles.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -18,7 +24,7 @@ import { JwtModule } from '@nestjs/jwt';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'mysql', // 数据库类型
-        entities: [User], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
+        entities: [User, Mail], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
         host: configService.get('DB_HOST'), // 主机，默认为localhost
         port: configService.get<number>('DB_PORT'), // 端口号
         username: configService.get('DB_USER'), // 用户名
@@ -26,7 +32,9 @@ import { JwtModule } from '@nestjs/jwt';
         database: configService.get('DB_DATABASE'), //数据库名
         timezone: '+08:00', //服务器上配置的时区
         synchronize: true, //根据实体自动创建数据库表， 生产环境建议关闭
-      }),
+        poolSize: 20,  
+      })
+
     }),
     JwtModule.registerAsync({
       global: true,
@@ -42,8 +50,18 @@ import { JwtModule } from '@nestjs/jwt';
       },
     }),
     UserModule,
+    MailModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+    provide: APP_GUARD,
+    useClass: AuthGuard,
+  },
+   {
+      provide: APP_GUARD,
+      useClass: RolesGuard, 
+    }
+],
 })
-export class AppModule {}
+export class AppModule { }

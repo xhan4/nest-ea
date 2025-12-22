@@ -1,4 +1,5 @@
 import { IsNotEmpty, MinLength } from "class-validator";
+import { RoleEnum } from "src/core/enums/roles.enum";
 export class CreateUserDto {
   @IsNotEmpty({
     message: "用户名不能为空",
@@ -11,8 +12,6 @@ export class CreateUserDto {
     message: "密码不能少于6位",
   })
   password: string;
-  @IsNotEmpty({
-    message: "appId不能为空",
-  })
-  app_id: string;
+  roles: RoleEnum[];
+  appId?: string;
 }

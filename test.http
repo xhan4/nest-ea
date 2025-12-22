@@ -1,0 +1,39 @@
+@BASE_URL = http://localhost:3005
+ @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjMsImFwcElkIjoiV0VCX0FETUlOIiwiY2hhcmFjdGVySWQiOjEsInJvbGVzIjpbIjEiXSwiaWF0IjoxNzU0NjMzMDA3LCJleHAiOjE3NTQ3MTk0MDd9.XMVc9tBKhoLtt97dA9-AH6qSmz5P5yt8AEeVc3hyaUI
+@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfR0FNRSIsImNoYXJhY3RlcklkIjo5LCJyb2xlcyI6WyIyIl0sImlhdCI6MTc1NDg3NTU1NSwiZXhwIjoxNzU0OTYxOTU1fQ.0O5SpTp6mFlBa8YEMvQVumRBnqHJ67XQbSPo5szR4aw
+POST {{BASE_URL}}/user/login
+Content-Type: application/json
+x-app-id: WEB_GAME
+
+{
+    "username": "test001",
+    "password": "123456"
+}
+
+###
+POST {{BASE_URL}}/user/register
+Content-Type: application/json
+x-app-id: WEB_ADMIN
+
+{
+    "username": "test002",
+    "password": "123456"
+}
+
+###
+GET  {{BASE_URL}}/user/user_list
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+###
+GET  {{BASE_URL}}/user/6
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
+
+###
+GET  {{BASE_URL}}/api/time
+Content-Type: application/json
+Authorization: Bearer {{token}}
+x-app-id: WEB_ADMIN
