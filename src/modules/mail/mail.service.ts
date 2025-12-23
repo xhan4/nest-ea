@@ -10,6 +10,8 @@ export class MailService {
   constructor(
     @InjectRepository(Mail)
     private mailRepo: Repository<Mail>,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
     private notifyGateway: NotifyGateway
   ) { }
   async getMailListById(userId: number, current: number = 1, pagesize: number = 10) {
@@ -34,8 +36,14 @@ export class MailService {
       content,
       sentAt: new Date(),
     });
-    this.notifyGateway.sendNotify(userId, EventType.NEW_MAIL, mail);
-    return mail;
+    this.notifyGateway.sendNotify(userId, EventType.NEW_MAIL, {
+      id: mail.id,
+      subject: mail.subject,
+      content: mail.content,
+      sentAt: mail.sentAt,
+      isRead: mail.isRead,
+    });
+    return {};
   }
 
   async batchSendMails(

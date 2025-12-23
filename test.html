@@ -47,12 +47,12 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:3005'; // 根据你的API地址修改
+        const API_BASE = 'http://localhost:3002'; // 根据你的API地址修改
         const defaultHeaders = {
             ['x-app-id']: 'WEB_CLIENT',
         }
-        let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfR0FNRSIsImNoYXJhY3RlcklkIjo5LCJyb2xlcyI6WyIyIl0sImlhdCI6MTc1NDY0MTI2NSwiZXhwIjoxNzU0NzI3NjY1fQ.nzGV32Y8XpaQ2u3oxxjRVmTollGqRClN6gx8zbz-Yjo';
-        const socket = io('http://localhost:3005', {
+        let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDEiLCJpZCI6NSwiYXBwSWQiOiJXRUJfR0FNRSIsInJvbGVzIjpbIjIiXSwiaWF0IjoxNzY2MzkyMDMzLCJleHAiOjE3NjY0Nzg0MzN9.wBN9zh4b5y7MwNUDWbUoEGX-EsnQ5VNZ7WkQ5bpVFY4';
+        const socket = io(API_BASE, {
             path: '/ws',       // 匹配服务端路径
             transports: ['websocket'], // 强制使用 WebSocket
             autoConnect: true,
