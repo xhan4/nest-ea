@@ -45,7 +45,7 @@ export class AuthGuard implements CanActivate {
       if (error instanceof TokenExpiredError) {
         // Token 过期的情况，返回刷新 Token 的专用返回码 408
         throw new HttpException(
-          'Token已过期，请重新登录或刷新Token',
+          'Token已过期，请重新登录',
           HttpStatus.REQUEST_TIMEOUT, // 这里可以返回 408 或其他合适的状态码
         );
       } else {

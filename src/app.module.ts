@@ -13,6 +13,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { Mail } from './entities/mail.entity';
 import { MailModule } from './modules/mail/mail.module';
 import { RolesGuard } from './core/auth/roles.guard';
+import { Sora2Module } from './modules/sora2/sora2.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -51,6 +52,7 @@ import { RolesGuard } from './core/auth/roles.guard';
     }),
     UserModule,
     MailModule,
+    Sora2Module,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],

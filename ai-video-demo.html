@@ -1,0 +1,223 @@
+<!-- 前端HTML示例 -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sora2视频生成</title>
+    <style>
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .video-preview {
+            max-width: 400px;
+            margin-top: 20px;
+        }
+        
+        .task-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .status-success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .status-failed {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .status-processing {
+            color: #2196F3;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <textarea id="prompt" placeholder="请输入视频描述..." rows="3" cols="50" value="一只可爱的猫咪在草地上玩耍，阳光明媚，微风吹拂..."></textarea>
+        <br>
+        <button onclick="generateVideo()">生成视频</button>
+    </div>
+    
+    <div id="progress-container" style="display:none;">
+        <h3>生成进度</h3>
+        <div class="progress-bar">
+            <div class="progress" id="progress-bar"></div>
+        </div>
+        <div id="progress-text">0%</div>
+        <div id="task-info" class="task-info" style="display:none;"></div>
+    </div>
+    
+    <div id="result-container" style="display:none;">
+        <h3>生成结果</h3>
+        <video id="video-preview" controls class="video-preview"></video>
+        <div id="video-url"></div>
+        <div id="result-info" class="task-info"></div>
+    </div>
+
+    <script>
+        let currentTaskId = null;
+        let pollingInterval = null;
+        const API_BASE = 'http://localhost:3002'; // 根据你的后端地址修改
+        
+        // 生成视频
+        async function generateVideo() {
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt) {
+                alert('请输入视频描述');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/video-ai/videos`, {
+                    method: 'POST',
+                    headers: {
+                        'x-app-id': 'WEB_ADMIN',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDIiLCJpZCI6NiwiYXBwSWQiOiJXRUJfQURNSU4iLCJyb2xlcyI6WyIyIl0sImlhdCI6MTc2NzU4OTkwMSwiZXhwIjoxNzY3Njc2MzAxfQ.F1FV7uky_LPsd2E_gJSJLXieCMsX7vL37Copy7mfqIE`
+                    },
+                    body: JSON.stringify({
+                        model: "sora-2",
+                        prompt: prompt,
+                        aspectRatio: "9:16",
+                        duration: 10
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.code === 0) {
+                    currentTaskId = result.data.id;
+                    console.log('获取到任务ID:', currentTaskId);
+                    document.getElementById('progress-container').style.display = 'block';
+                    startPolling();
+                } else {
+                    alert('创建任务失败: ' + result.msg);
+                }
+            } catch (error) {
+                alert('网络错误: ' + error.message);
+            }
+        }
+
+        // 开始轮询进度
+        function startPolling() {
+            if (!currentTaskId) {
+                console.error('任务ID为空，无法开始轮询');
+                alert('任务ID获取失败，请重试');
+                return;
+            }
+            
+            console.log('开始轮询，任务ID:', currentTaskId);
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/video-ai/videos/${currentTaskId}/result`,{
+                        headers: {
+                            'x-app-id': 'WEB_ADMIN',
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QwMDIiLCJpZCI6NiwiYXBwSWQiOiJXRUJfQURNSU4iLCJyb2xlcyI6WyIyIl0sImlhdCI6MTc2NzU4OTkwMSwiZXhwIjoxNzY3Njc2MzAxfQ.F1FV7uky_LPsd2E_gJSJLXieCMsX7vL37Copy7mfqIE`
+                        }
+                    });
+                    const result = await response.json();
+                    
+                    if (result.code === 0) {
+                        const data = result.data;
+                        
+                        // 更新进度条
+                        const progressBar = document.getElementById('progress-bar');
+                        const progressText = document.getElementById('progress-text');
+                        progressBar.style.width = data.progress + '%';
+                        progressText.textContent = data.progress + '%';
+                        
+                        // 显示任务信息
+                        updateTaskInfo(data);
+                        
+                        // 检查任务状态
+                        if (data.status === 'succeeded') {
+                            clearInterval(pollingInterval);
+                            showResult(data);
+                        } else if (data.status === 'failed') {
+                            clearInterval(pollingInterval);
+                            alert('视频生成失败: ' + (data.error || data.failure_reason));
+                        }
+                    } else if (result.code === -22) {
+                        clearInterval(pollingInterval);
+                        alert('任务不存在');
+                    }
+                } catch (error) {
+                    console.error('轮询错误:', error);
+                }
+            }, 2000); // 每2秒轮询一次
+        }
+
+        // 更新任务信息显示
+        function updateTaskInfo(data) {
+            const taskInfoDiv = document.getElementById('task-info');
+            taskInfoDiv.style.display = 'block';
+            
+            let statusClass = 'status-processing';
+            if (data.status === 'succeeded') statusClass = 'status-success';
+            if (data.status === 'failed') statusClass = 'status-failed';
+            
+            const startTime = new Date(data.start_time * 1000).toLocaleString();
+            const endTime = data.end_time ? new Date(data.end_time * 1000).toLocaleString() : '进行中';
+            
+            taskInfoDiv.innerHTML = `
+                <strong>任务信息:</strong><br>
+                任务ID: ${data.id}<br>
+                状态: <span class="${statusClass}">${data.status}</span><br>
+                进度: ${data.progress}%<br>
+                开始时间: ${startTime}<br>
+                结束时间: ${endTime}<br>
+                回调URL: ${data.callback_url}<br>
+                ${data.error ? `错误信息: ${data.error}<br>` : ''}
+                ${data.failure_reason ? `失败原因: ${data.failure_reason}<br>` : ''}
+            `;
+        }
+
+        // 显示结果
+        function showResult(data) {
+            document.getElementById('result-container').style.display = 'block';
+            
+            if (data.results && data.results.length > 0) {
+                const result = data.results[0];
+                const videoElement = document.getElementById('video-preview');
+                const videoUrlDiv = document.getElementById('video-url');
+                
+                videoElement.src = result.url;
+                videoUrlDiv.innerHTML = `<strong>视频链接:</strong> <a href="${result.url}" target="_blank">${result.url}</a>`;
+                
+                // 显示详细结果信息
+                const resultInfoDiv = document.getElementById('result-info');
+                resultInfoDiv.innerHTML = `
+                    <strong>结果详情:</strong><br>
+                    视频ID: ${result.pid}<br>
+                    去水印: ${result.removeWatermark ? '是' : '否'}<br>
+                    视频URL: <a href="${result.url}" target="_blank">${result.url}</a><br>
+                    任务状态: <span class="status-success">${data.status}</span><br>
+                    总耗时: ${Math.round((data.end_time - data.start_time) / 60)}分钟
+                `;
+            } else {
+                alert('没有生成视频结果');
+            }
+        }
+    </script>
+</body>
+</html>
