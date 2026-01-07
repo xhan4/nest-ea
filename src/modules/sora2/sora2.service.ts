@@ -75,7 +75,6 @@ export class Sora2Service {
           data.code || HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
-        this.logger.error(`视频状态: ${data.data.progress}`);
       return data.data;
     } catch (error) {
       if (error.response) {
