@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User} from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -10,6 +10,9 @@ import { RefreshUserDto } from './dto/refresh-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { FindOneDto } from './dto/find-one.dto';
 import { RoleEnum } from 'src/core/enums/roles.enum';
+import { MembershipEnum } from 'src/core/enums/membership.enum';
+import { PointsService } from '../points/points.service';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -17,9 +20,11 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+    private pointsService: PointsService,
+  ) {}
+
   async findOne(id: number): Promise<FindOneDto> {
-    const user = await this.userRepository.findOne({where: { id } });
+    const user = await this.userRepository.findOne({ where: { id } });
     return {
       userId: user.id,
       username: user.username,
@@ -29,8 +34,11 @@ export class UserService {
       active: user.active,
       create_time: user.create_time,
       update_time: user.update_time,
-    }
+      points: user.points,
+      membership: user.membership,
+    };
   }
+
   findAll(): Promise<User[]> {
     return this.userRepository.find({
       select: {
@@ -42,9 +50,12 @@ export class UserService {
         active: true,
         create_time: true,
         update_time: true,
-      }
-    })
+        points: true,
+        membership: true,
+      },
+    });
   }
+
   async registe(createUserDto: CreateUserDto) {
     const { username, password, appId } = createUserDto;
     const existUser = await this.userRepository.findOne({ where: { username } });
@@ -52,18 +63,27 @@ export class UserService {
       throw new HttpException('用户已存在', HttpStatus.BAD_REQUEST);
     }
     try {
-      const salt = creatSalt()
-      await this.userRepository.save({
+      const salt = creatSalt();
+      const user = await this.userRepository.save({
         username,
         nickname: randomNickName(6),
         salt: salt,
         password: encryption(password, salt),
         appId,
-        roles: [RoleEnum.USER] // 设置默认角色
+        roles: [RoleEnum.USER], // 设置默认角色
+        membership: MembershipEnum.NORMAL, // 设置默认会员等级为普通用户
+        points: 0, // 初始积分为0，稍后通过积分服务添加
       });
-      return '注册成功';
+
+      // 新用户注册赠送20积分
+      await this.pointsService.addRegisterBonus(user.id);
+
+      return {
+        message: '注册成功',
+        userId: user.id,
+      };
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
   async login(loginDto: LoginUserDto) {

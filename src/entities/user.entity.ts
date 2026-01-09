@@ -1,5 +1,6 @@
 import { Column, Entity,PrimaryGeneratedColumn, Unique } from "typeorm";
 import { RoleEnum } from "src/core/enums/roles.enum";
+import { MembershipEnum } from "src/core/enums/membership.enum";
 
 @Entity("tb_user")
 export class User {
@@ -41,6 +42,17 @@ export class User {
 
   @Column()
   salt: string;
+  // 新增积分字段
+  @Column({ type: 'int', default: 0 })
+  points: number;
+
+  // 新增会员等级字段
+  @Column({ 
+    type: 'enum', 
+    enum: MembershipEnum, 
+    default: MembershipEnum.NORMAL 
+  })
+  membership: MembershipEnum;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   create_time: Date;

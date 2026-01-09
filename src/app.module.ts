@@ -14,6 +14,10 @@ import { Mail } from './entities/mail.entity';
 import { MailModule } from './modules/mail/mail.module';
 import { RolesGuard } from './core/auth/roles.guard';
 import { Sora2Module } from './modules/sora2/sora2.module';
+import { PointsModule } from './modules/points/points.module';
+import { VideoRecordModule } from './modules/video-record/video-record.module';
+import { PointsRecord } from './entities/points-record.entity';
+import { VideoRecord } from './entities/video-record.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,7 +29,7 @@ import { Sora2Module } from './modules/sora2/sora2.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'mysql', // 数据库类型
-        entities: [User, Mail], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
+        entities: [User, Mail, PointsRecord, VideoRecord], // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
         host: configService.get('DB_HOST'), // 主机，默认为localhost
         port: configService.get<number>('DB_PORT'), // 端口号
         username: configService.get('DB_USER'), // 用户名
@@ -53,6 +57,8 @@ import { Sora2Module } from './modules/sora2/sora2.module';
     UserModule,
     MailModule,
     Sora2Module,
+    PointsModule,
+    VideoRecordModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
