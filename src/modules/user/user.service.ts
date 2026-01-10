@@ -24,19 +24,30 @@ export class UserService {
   ) {}
 
   async findOne(id: number): Promise<FindOneDto> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    return {
-      userId: user.id,
-      username: user.username,
-      avatar: user.avatar,
-      roles: user.roles,
-      nickname: user.nickname,
-      active: user.active,
-      create_time: user.create_time,
-      update_time: user.update_time,
-      points: user.points,
-      membership: user.membership,
-    };
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new HttpException('用户不存在', HttpStatus.NOT_FOUND);
+      }
+      return {
+        userId: user.id,
+        username: user.username,
+        avatar: user.avatar,
+        roles: user.roles,
+        nickname: user.nickname,
+        active: user.active,
+        create_time: user.create_time,
+        update_time: user.update_time,
+        points: user.points,
+        membership: user.membership,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      console.error('查询用户信息时发生错误:', error);
+      throw new HttpException('服务暂时不可用，请稍后再试', HttpStatus.SERVICE_UNAVAILABLE);
+    }
   }
 
   findAll(): Promise<User[]> {
@@ -58,11 +69,11 @@ export class UserService {
 
   async registe(createUserDto: CreateUserDto) {
     const { username, password, appId } = createUserDto;
-    const existUser = await this.userRepository.findOne({ where: { username } });
-    if (existUser) {
-      throw new HttpException('用户已存在', HttpStatus.BAD_REQUEST);
-    }
     try {
+      const existUser = await this.userRepository.findOne({ where: { username } });
+      if (existUser) {
+        throw new HttpException('用户已存在', HttpStatus.BAD_REQUEST);
+      }
       const salt = creatSalt();
       const user = await this.userRepository.save({
         username,
@@ -83,47 +94,69 @@ export class UserService {
         userId: user.id,
       };
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      console.error('注册用户时发生错误:', error);
+      throw new HttpException('注册失败，请稍后再试', HttpStatus.BAD_REQUEST);
     }
   }
+
   async login(loginDto: LoginUserDto) {
     const { username, password, appId } = loginDto;
-    const user = await this.userRepository.findOne({
-      where: [
-        { username: username },
-        { nickname: username }
-      ]
-    });
+    try {
+      let user;
+      try {
+        user = await this.userRepository.findOne({
+          where: [
+            { username: username },
+            { nickname: username }
+          ]
+        });
+      } catch (dbError) {
+        // 处理数据库连接错误
+        console.error('数据库查询错误:', dbError);
+        throw new HttpException('服务暂时不可用，请稍后再试', HttpStatus.SERVICE_UNAVAILABLE);
+      }
 
-    if (!user) {
-      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
-    }
-    if (user.password !== encryption(password, user.salt)) {
-      throw new HttpException('用户名或密码错误', HttpStatus.BAD_REQUEST);
-    }
-    if (user.appId !== appId) {
-      throw new HttpException('无权访问该应用', HttpStatus.FORBIDDEN);
-    }
-    const payload = { 
-      username: user.username, 
-      id: user.id, 
-      appId: user.appId,
-      roles: user.roles // 添加roles信息
-    };
+      if (!user) {
+        throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
+      }
+      if (user.password !== encryption(password, user.salt)) {
+        throw new HttpException('用户名或密码错误', HttpStatus.BAD_REQUEST);
+      }
+      if (user.appId !== appId) {
+        throw new HttpException('无权访问该应用', HttpStatus.FORBIDDEN);
+      }
+      const payload = { 
+        username: user.username, 
+        id: user.id, 
+        appId: user.appId,
+        roles: user.roles // 添加roles信息
+      };
 
-    const userInfo = {
-      userId: user.id,
-      username: user.username,
-      avatar: user.avatar,
-      roles: user.roles,
-      nickname: user.nickname,
-      active: user.active,
-      create_time: user.create_time,
-      update_time: user.update_time,
+      const userInfo = {
+        userId: user.id,
+        username: user.username,
+        avatar: user.avatar,
+        roles: user.roles,
+        nickname: user.nickname,
+        active: user.active,
+        create_time: user.create_time,
+        update_time: user.update_time,
+      }
+      const token = this.jwtService.sign(payload, { expiresIn: this.configService.get("JWT_EXP") });
+      const refreshToken = this.jwtService.sign({ id: user.id }, { expiresIn: this.configService.get("JWT_REFRESH_EXP") })
+      return { token, refreshToken,userInfo}
+    } catch (error) {
+      // 如果已经是HttpException，直接抛出
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      // 其他未知错误
+      console.error('登录过程中发生未知错误:', error);
+      throw new HttpException('服务器内部错误', HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    const token = this.jwtService.sign(payload, { expiresIn: this.configService.get("JWT_EXP") });
-    const refreshToken = this.jwtService.sign({ id: user.id }, { expiresIn: this.configService.get("JWT_REFRESH_EXP") })
-    return { token, refreshToken,userInfo}
   }
 
   // 刷新token
@@ -159,8 +192,11 @@ export class UserService {
 
       return { refreshToken: newRefreshToken, token };
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      console.error('刷新token时发生错误:', error);
       throw new HttpException('refresh_token已过期', HttpStatus.BAD_REQUEST);
     }
   }
 }
-

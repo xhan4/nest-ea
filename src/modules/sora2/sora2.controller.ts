@@ -27,16 +27,12 @@ export class Sora2Controller {
         secret: this.configService.get('JWT_SECRET'),
       });
       
-      const userId = payload.id; // 使用id而不是sub
+      const userId = payload.id; 
       
       // 调用服务创建视频
       const result = await this.sora2Service.createVideo(createVideoDto, userId);
       
-      return {
-        statusCode: HttpStatus.OK,
-        message: '视频创建成功',
-        data: result,
-      };
+      return result
     } catch (error) {
       throw new HttpException(
         error.message || '创建视频失败',
@@ -45,19 +41,15 @@ export class Sora2Controller {
     }
   }
 
-  @Get('video-status/:videoId')
-  async getVideoStatus(@Param('videoId') videoId: string) {
+  @Get('videos/:id/result')
+  async getVideoResult(@Param('id') videoId: string) {
     try {
       const result = await this.sora2Service.getVideoStatus(videoId);
       
-      return {
-        statusCode: HttpStatus.OK,
-        message: '查询成功',
-        data: result,
-      };
+      return result
     } catch (error) {
       throw new HttpException(
-        error.message || '查询视频状态失败',
+        error.message || '查询视频结果失败',
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

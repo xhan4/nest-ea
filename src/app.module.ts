@@ -37,7 +37,14 @@ import { VideoRecord } from './entities/video-record.entity';
         database: configService.get('DB_DATABASE'), //数据库名
         timezone: '+08:00', //服务器上配置的时区
         synchronize: true, //根据实体自动创建数据库表， 生产环境建议关闭
-        poolSize: 20,  
+        // 使用正确的MySQL2连接池配置
+        extra: {
+          connectionLimit: 20,          // 连接池最大连接数
+          // 移除了无效的 acquireTimeout 和 timeout 选项
+          // 添加以下选项以提高连接稳定性
+          enableKeepAlive: true,        // 启用TCP keep-alive
+          keepAliveInitialDelay: 0,     // keep-alive初始延迟
+        }
       })
 
     }),

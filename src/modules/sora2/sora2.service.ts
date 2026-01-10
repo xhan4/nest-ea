@@ -23,9 +23,22 @@ export class Sora2Service {
     private readonly videoRecordService: VideoRecordService,
   ) {}
 
-  // 创建视频任务（立即返回任务ID）
-  async createVideo(createVideoDto: CreateVideoDto, userId?: number): Promise<VideoResponseDto> {
+ // 创建视频任务（立即返回任务ID）
+  async createVideo(createVideoDto: CreateVideoDto, userId: number): Promise<VideoResponseDto> {
     try {
+      // 获取用户信息
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      
+      // 获取用户会员等级和所需积分
+      const membership = user.membership;
+      const pointsCost = this.pointsService.getVideoPointsCost(membership);
+
+      // 检查用户积分是否足够
+      const userPoints = await this.pointsService.getUserPoints(userId);
+      if (userPoints < pointsCost) {
+        throw new HttpException('积分不足', HttpStatus.BAD_REQUEST);
+      }
+
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.apiKey}`,
@@ -46,42 +59,24 @@ export class Sora2Service {
         );
       }
 
-      // 如果提供了userId，则处理积分和记录
-      if (userId) {
-        // 获取用户信息
-        const user = await this.userRepository.findOne({ where: { id: userId } });
-        if (!user) {
-          throw new HttpException('用户不存在', HttpStatus.NOT_FOUND);
-        }
+      // 扣除积分
+      const pointsRecord = await this.pointsService.deductPoints(
+        userId,
+        pointsCost,
+        PointsTransactionType.VIDEO_DEDUCTION,
+        '视频生成扣费',
+        data.data.id
+      );
 
-        // 获取用户会员等级和所需积分
-        const membership = user.membership;
-        const pointsCost = this.pointsService.getVideoPointsCost(membership);
-
-        // 检查用户积分是否足够
-        const userPoints = await this.pointsService.getUserPoints(userId);
-        if (userPoints < pointsCost) {
-          throw new HttpException('积分不足', HttpStatus.BAD_REQUEST);
-        }
-
-        // 扣除积分
-        const pointsRecord = await this.pointsService.deductPoints(
-          userId,
-          pointsCost,
-          PointsTransactionType.VIDEO_DEDUCTION,
-          '视频生成扣费',
-          data.data.id
-        );
-
-        // 创建视频记录
-        await this.videoRecordService.createVideoRecord(
-          userId,
-          data.data.id,
-          pointsCost,
-          requestBody
-        );
-      }
-
+      // 创建视频记录
+      await this.videoRecordService.createVideoRecord(
+        userId,
+        data.data.id,
+        pointsCost,
+        requestBody
+      );
+      
+      console.log('视频生成成功', data.data);
       return data.data;
     } catch (error) {
       // 如果是积分不足错误，直接抛出
@@ -89,23 +84,21 @@ export class Sora2Service {
         throw error;
       }
 
-      // 如果提供了userId且不是用户不存在的错误，尝试返还积分
-      if (userId && error.message !== '用户不存在') {
-        try {
-          const user = await this.userRepository.findOne({ where: { id: userId } });
-          if (user) {
-            const pointsCost = this.pointsService.getVideoPointsCost(user.membership);
-            await this.pointsService.addPoints(
-              userId,
-              pointsCost,
-              PointsTransactionType.VIDEO_REFUND,
-              `视频生成失败返还积分 - ${error.response?.data?.msg || error.message || '视频生成失败'}`,
-              null
-            );
-          }
-        } catch (pointsError) {
-          this.logger.error('返还积分失败', pointsError);
+      // 尝试返还积分
+      try {
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (user) {
+          const pointsCost = this.pointsService.getVideoPointsCost(user.membership);
+          await this.pointsService.addPoints(
+            userId,
+            pointsCost,
+            PointsTransactionType.VIDEO_REFUND,
+            `视频生成失败返还积分 - ${error.response?.data?.msg || error.message || '视频生成失败'}`,
+            null
+          );
         }
+      } catch (pointsError) {
+        this.logger.error('返还积分失败', pointsError);
       }
 
       if (error.response) {
@@ -120,8 +113,7 @@ export class Sora2Service {
       }
     }
   }
-
-  // 查询视频状态和结果
+    // 查询视频状态和结果
   async getVideoStatus(id: string): Promise<VideoResponseDto> {
     try {
       const headers = {
@@ -147,7 +139,7 @@ export class Sora2Service {
         // 获取视频记录
         const videoRecord = await this.videoRecordService.getVideoRecordByVideoId(id);
         if (videoRecord) {
-          // 更新视频记录为失败状态
+          // 更新视频记录为失败状态（此方法已包含返还积分逻辑）
           await this.videoRecordService.updateVideoRecordFailed(
             id,
             data.msg || '获取视频状态失败',
@@ -174,7 +166,7 @@ export class Sora2Service {
             data
           );
         } else if (data.data.status === 'failed') {
-          // 视频生成失败
+          // 视频生成失败 - 更新记录并返还积分
           await this.videoRecordService.updateVideoRecordFailed(
             id,
             data.data.failure_reason || data.data.error || '视频生成失败',
@@ -195,7 +187,7 @@ export class Sora2Service {
         // 获取视频记录
         const videoRecord = await this.videoRecordService.getVideoRecordByVideoId(id);
         if (videoRecord) {
-          // 更新视频记录为失败状态
+          // 更新视频记录为失败状态（此方法已包含返还积分逻辑）
           await this.videoRecordService.updateVideoRecordFailed(
             id,
             error.response.data.msg || '获取视频状态失败',
@@ -213,5 +205,5 @@ export class Sora2Service {
         throw new HttpException('请求配置错误', HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
+   }
   }
-}

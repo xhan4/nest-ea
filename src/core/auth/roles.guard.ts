@@ -12,11 +12,11 @@ export class RolesGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    
-    if (!requiredRoles) {
+    if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
     const { user } = context.switchToHttp().getRequest();
+
     if (!requiredRoles.some(role => user?.roles?.includes(role))) {
       throw new HttpException('无权访问：需要管理员权限', HttpStatus.FORBIDDEN);
     }
