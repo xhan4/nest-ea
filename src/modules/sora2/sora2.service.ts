@@ -25,6 +25,9 @@ export class Sora2Service {
 
  // 创建视频任务（立即返回任务ID）
   async createVideo(createVideoDto: CreateVideoDto, userId: number): Promise<VideoResponseDto> {
+    let pointsRecord = null;
+    let videoRecord = null;
+    
     try {
       // 获取用户信息
       const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -60,7 +63,7 @@ export class Sora2Service {
       }
 
       // 扣除积分
-      const pointsRecord = await this.pointsService.deductPoints(
+      pointsRecord = await this.pointsService.deductPoints(
         userId,
         pointsCost,
         PointsTransactionType.VIDEO_DEDUCTION,
@@ -69,7 +72,7 @@ export class Sora2Service {
       );
 
       // 创建视频记录
-      await this.videoRecordService.createVideoRecord(
+      videoRecord = await this.videoRecordService.createVideoRecord(
         userId,
         data.data.id,
         pointsCost,
@@ -84,21 +87,23 @@ export class Sora2Service {
         throw error;
       }
 
-      // 尝试返还积分
-      try {
-        const user = await this.userRepository.findOne({ where: { id: userId } });
-        if (user) {
-          const pointsCost = this.pointsService.getVideoPointsCost(user.membership);
-          await this.pointsService.addPoints(
-            userId,
-            pointsCost,
-            PointsTransactionType.VIDEO_REFUND,
-            `视频生成失败返还积分 - ${error.response?.data?.msg || error.message || '视频生成失败'}`,
-            null
-          );
+      // 只有在已经扣除积分的情况下才返还积分
+      if (pointsRecord) {
+        try {
+          const user = await this.userRepository.findOne({ where: { id: userId } });
+          if (user) {
+            const pointsCost = this.pointsService.getVideoPointsCost(user.membership);
+            await this.pointsService.addPoints(
+              userId,
+              pointsCost,
+              PointsTransactionType.VIDEO_REFUND,
+              `视频创建失败返还积分 - ${error.response?.data?.msg || error.message || '视频生成失败'}`,
+              videoRecord ? videoRecord.videoId : null
+            );
+          }
+        } catch (pointsError) {
+          this.logger.error('返还积分失败', pointsError);
         }
-      } catch (pointsError) {
-        this.logger.error('返还积分失败', pointsError);
       }
 
       if (error.response) {

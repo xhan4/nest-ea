@@ -36,15 +36,15 @@ export class PointsService {
   getVideoPointsCost(membership: MembershipEnum): number {
     switch (membership) {
       case MembershipEnum.NORMAL:
-        return 20;  // 普通用户20积分
+        return 15;  // 普通用户15积分
       case MembershipEnum.REGULAR:
         return 10;  // 普通会员10积分
       case MembershipEnum.PREMIUM:
-        return 6;   // 高级会员6积分
+        return 5;   // 高级会员5积分
       case MembershipEnum.LIFETIME:
         return 3;   // 终身会员3积分
       default:
-        return 20;  // 默认普通用户积分
+        return 15;  // 默认普通用户积分
     }
   }
   // 增加积分
@@ -148,7 +148,7 @@ export class PointsService {
     );
   }
 
-  // 更新积分记录的relatedId
+ // 更新积分记录的relatedId
   async updatePointsRecordRelatedId(recordId: number, relatedId: string): Promise<PointsRecord> {
     const record = await this.pointsRecordRepository.findOne({ where: { id: recordId } });
     if (!record) {
@@ -157,5 +157,17 @@ export class PointsService {
 
     record.relatedId = relatedId;
     return await this.pointsRecordRepository.save(record);
+  }
+
+  // 检查是否已经为某个视频ID返还过积分
+  async hasRefundedForVideo(userId: number, videoId: string): Promise<boolean> {
+    const refundRecord = await this.pointsRecordRepository.findOne({
+      where: {
+        user: { id: userId },
+        relatedId: videoId,
+        transactionType: PointsTransactionType.VIDEO_REFUND
+      }
+    });
+    return !!refundRecord;
   }
 }

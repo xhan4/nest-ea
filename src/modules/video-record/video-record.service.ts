@@ -84,15 +84,22 @@ export class VideoRecordService {
     videoRecord.responseResult = responseResult;
     videoRecord.completedAt = new Date();
 
-    // 返还积分
+    // 检查是否已经返还过积分，如果没有则返还
     if (videoRecord.pointsDeducted > 0) {
-      await this.pointsService.addPoints(
+      const hasRefunded = await this.pointsService.hasRefundedForVideo(
         videoRecord.user.id,
-        videoRecord.pointsDeducted,
-        PointsTransactionType.VIDEO_REFUND,
-        `视频生成失败返还积分 - ${errorMessage}`,
         videoId
       );
+      
+      if (!hasRefunded) {
+        await this.pointsService.addPoints(
+          videoRecord.user.id,
+          videoRecord.pointsDeducted,
+          PointsTransactionType.VIDEO_REFUND,
+          `视频生成失败返还积分 - ${errorMessage}`,
+          videoId
+        );
+      }
     }
 
     return await this.videoRecordRepository.save(videoRecord);
