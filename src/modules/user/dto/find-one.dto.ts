@@ -1,5 +1,6 @@
-import { RoleEnum } from "src/core/enums/roles.enum";
 import { MembershipEnum } from "src/core/enums/membership.enum";
+import { RoleEnum } from "src/core/enums/roles.enum";
+import { UserStatusEnum } from "src/core/enums/user-status.enum";
 
 export class FindOneDto {
   userId: number;
@@ -7,7 +8,7 @@ export class FindOneDto {
   avatar: string;
   roles: RoleEnum[];
   nickname: string;
-  active: number;
+  active: UserStatusEnum;
   points: number;
   membership: MembershipEnum;
   create_time: Date;

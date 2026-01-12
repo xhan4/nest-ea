@@ -1,6 +1,7 @@
 import { Column, Entity,PrimaryGeneratedColumn, Unique } from "typeorm";
 import { RoleEnum } from "src/core/enums/roles.enum";
 import { MembershipEnum } from "src/core/enums/membership.enum";
+import { UserStatusEnum } from "src/core/enums/user-status.enum";
 
 @Entity("tb_user")
 export class User {
@@ -37,8 +38,13 @@ export class User {
   @Column({})
   nickname: string;
 
-  @Column({ nullable: true })
-  active: number
+  @Column({ 
+    type: 'enum', 
+    enum: UserStatusEnum, 
+    default: UserStatusEnum.ACTIVE,
+    nullable: true 
+  })
+  active: UserStatusEnum;
 
   @Column()
   salt: string;
