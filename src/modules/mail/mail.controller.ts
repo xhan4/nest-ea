@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Req, Body } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { Roles } from 'src/core/decorators/rules.decorator';
 import { RoleEnum } from 'src/core/enums/roles.enum';

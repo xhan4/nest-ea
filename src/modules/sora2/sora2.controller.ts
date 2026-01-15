@@ -12,46 +12,29 @@ export class Sora2Controller {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
+  
   @Post('videos')
   async createVideo(@Body() createVideoDto: CreateVideoDto, @Req() req: Request) {
-    try {
-      // 从请求头中获取token
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      
-      if (!token) {
-        throw new HttpException('未提供认证令牌', HttpStatus.UNAUTHORIZED);
-      }
-      
-      // 验证token并获取用户ID
-      const payload = this.jwtService.verify(token, {
-        secret: this.configService.get('JWT_SECRET'),
-      });
-      
-      const userId = payload.id; 
-      
-      // 调用服务创建视频
-      const result = await this.sora2Service.createVideo(createVideoDto, userId);
-      
-      return result
-    } catch (error) {
-      throw new HttpException(
-        error.message || '创建视频失败',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    // 从请求头中获取token
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      throw new HttpException('未提供认证令牌', HttpStatus.UNAUTHORIZED);
     }
+    
+    // 验证token并获取用户ID
+    const payload = this.jwtService.verify(token, {
+      secret: this.configService.get('JWT_SECRET'),
+    });
+    
+    const userId = payload.id; 
+    
+    // 调用服务创建视频
+    return this.sora2Service.createVideo(createVideoDto, userId);
   }
 
   @Get('videos/:id/result')
   async getVideoResult(@Param('id') videoId: string) {
-    try {
-      const result = await this.sora2Service.getVideoStatus(videoId);
-      
-      return result
-    } catch (error) {
-      throw new HttpException(
-        error.message || '查询视频结果失败',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return this.sora2Service.getVideoStatus(videoId);
   }
 }

@@ -11,7 +11,6 @@ export class MailService {
     @InjectRepository(Mail)
     private mailRepo: Repository<Mail>,
     @InjectRepository(User)
-    private userRepo: Repository<User>,
     private notifyGateway: NotifyGateway
   ) { }
   async getMailListById(userId: number, current: number = 1, pagesize: number = 10) {

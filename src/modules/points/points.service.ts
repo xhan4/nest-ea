@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between, Like } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { PointsRecord, PointsTransactionType } from '../../entities/points-record.entity';
 import { MembershipEnum } from '../../core/enums/membership.enum';
@@ -136,6 +136,61 @@ export class PointsService {
     });
 
     return { records, total };
+  }
+// 管理员获取所有用户积分记录，支持按用户名、昵称和日期筛选
+  async getAllUsersPointsHistory(
+    page: number = 1,
+    limit: number = 10,
+    username?: string,
+    nickname?: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<{ records: (PointsRecord & { userAccount: string, userNickname: string })[], total: number }> {
+    // 构建查询条件
+    const whereCondition: any = {};
+    
+    // 如果提供了用户名筛选条件
+    if (username) {
+      whereCondition.user = { username: Like(`%${username}%`) };
+    }
+    
+    // 如果提供了昵称筛选条件
+    if (nickname) {
+      if (whereCondition.user) {
+        whereCondition.user.nickname = Like(`%${nickname}%`);
+      } else {
+        whereCondition.user = { nickname: Like(`%${nickname}%`) };
+      }
+    }
+    
+    // 如果提供了日期范围筛选条件
+    if (startDate && endDate) {
+      whereCondition.createdAt = Between(startDate, endDate);
+    } else if (startDate) {
+      whereCondition.createdAt = Between(startDate, new Date());
+    } else if (endDate) {
+      whereCondition.createdAt = Between(new Date(0), endDate);
+    }
+    
+    // 查询积分记录
+    const [records, total] = await this.pointsRecordRepository.findAndCount({
+      where: whereCondition,
+      relations: ['user'], // 关联查询用户信息
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    
+    // 为每条记录添加用户账号和昵称
+    const recordsWithUserInfo = records.map(record => {
+      return {
+        ...record,
+        userAccount: record.user.username,
+        userNickname: record.user.nickname
+      };
+    });
+    
+    return { records: recordsWithUserInfo, total };
   }
 
   // 新用户注册赠送积分
