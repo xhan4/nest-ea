@@ -145,7 +145,7 @@ export class PointsService {
     nickname?: string,
     startDate?: Date,
     endDate?: Date
-  ): Promise<{ records: (PointsRecord & { userAccount: string, userNickname: string })[], total: number }> {
+  ): Promise<{ records: (Omit<PointsRecord, 'user'> & { username: string, nickname: string, userId: number })[], total: number }> {
     // 构建查询条件
     const whereCondition: any = {};
     
@@ -183,10 +183,12 @@ export class PointsService {
     
     // 为每条记录添加用户账号和昵称
     const recordsWithUserInfo = records.map(record => {
+       const { user, ...recordWithoutUser } = record;
       return {
-        ...record,
-        userAccount: record.user.username,
-        userNickname: record.user.nickname
+        ...recordWithoutUser,
+        userId: record.user.id,
+        username: record.user.username,
+        nickname: record.user.nickname,
       };
     });
     
