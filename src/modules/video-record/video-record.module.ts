@@ -4,9 +4,11 @@ import { VideoRecordService } from './video-record.service';
 import { VideoRecord } from '../../entities/video-record.entity';
 import { User } from '../../entities/user.entity';
 import { PointsModule } from '../points/points.module';
+import { VideoRecordController } from './video-record.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([VideoRecord, User]), PointsModule],
+    controllers: [VideoRecordController],
   providers: [VideoRecordService],
   exports: [VideoRecordService],
 })

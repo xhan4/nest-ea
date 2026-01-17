@@ -124,4 +124,69 @@ export class VideoRecordService {
       relations: ['user'],
     });
   }
+  async getAllUsersVideoRecords(
+    page: number = 1,
+    limit: number = 10,
+    username?: string,
+    nickname?: string,
+    startDate?: Date,
+    endDate?: Date,
+    status?: VideoStatus
+  ): Promise<{ records: (Omit<VideoRecord, 'user'> & { username: string, nickname: string })[], total: number }> {
+    // 构建查询条件
+    const whereCondition: any = {};
+    
+    if (username) {
+      whereCondition.user = { ...whereCondition.user, username: username };
+    }
+    
+    if (nickname) {
+      whereCondition.user = { ...whereCondition.user, nickname: nickname };
+    }
+    
+    if (status) {
+      whereCondition.status = status;
+    }
+    
+    // 处理日期范围
+    let dateFilter: any = {};
+    if (startDate || endDate) {
+      dateFilter = {};
+      if (startDate) {
+        dateFilter.createdAt = { ...dateFilter.createdAt, gte: startDate };
+      }
+      if (endDate) {
+        // 将结束日期设置为当天的23:59:59
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        dateFilter.createdAt = { ...dateFilter.createdAt, lte: endOfDay };
+      }
+    }
+    
+    // 合并查询条件
+    const finalWhereCondition = Object.keys(dateFilter).length > 0 
+      ? { ...whereCondition, ...dateFilter }
+      : whereCondition;
+    
+    // 查询视频记录
+    const [records, total] = await this.videoRecordRepository.findAndCount({
+      where: finalWhereCondition,
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    
+    // 转换数据格式，移除user对象，添加userAccount和userNickname字段
+    const formattedRecords = records.map(record => {
+      const { user, ...recordWithoutUser } = record;
+      return {
+        ...recordWithoutUser,
+        username: user.username,
+        nickname: user.nickname,
+      };
+    });
+    
+    return { records: formattedRecords, total };
+  }
 }
